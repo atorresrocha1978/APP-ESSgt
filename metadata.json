@@ -1,0 +1,8 @@
+{
+  "name": "ESSgt - UIS - Gestão de Chamada e Fila de Consultórios",
+  "description": "Sistema completo para chamada de pacientes, recepção, consultório clínico, consultório de especialidades, medicação, odontologia, painel de TV para sala de espera e relatórios gerenciais de desempenho.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
