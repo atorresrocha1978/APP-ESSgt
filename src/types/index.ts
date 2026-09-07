@@ -23,14 +23,9 @@ export interface User {
   avatarBg?: string;
 }
 
-export type RoomId = 
-  | 'consultorio_01' 
-  | 'consultorio_02' 
-  | 'medicacao' 
-  | 'odonto_01' 
-  | 'odonto_02';
+export type RoomId = string;
 
-export type RoomCategory = 'clinico' | 'especialidade' | 'medicacao' | 'odonto';
+export type RoomCategory = 'clinico' | 'especialidade' | 'medicacao' | 'odonto' | 'geral';
 
 export type Priority = 'normal' | 'preferencial' | 'urgente';
 
@@ -165,7 +160,7 @@ export interface RoomConfig {
   badgeText: string;
   glowColor: string;
   defaultDoctor: string;
-  soundType: 'clinico' | 'especialidade' | 'medicacao' | 'odonto1' | 'odonto2';
+  soundType: 'clinico' | 'especialidade' | 'medicacao' | 'odonto1' | 'odonto2' | string;
   icon: string;
 }
 

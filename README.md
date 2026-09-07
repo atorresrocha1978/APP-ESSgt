@@ -32,23 +32,38 @@ Sistema para recepção, triagem militar/civil, consultórios médicos/odontoló
 
 ---
 
-### Opção 2: Modo de Produção / Build Estático
+### Opção 2: Publicação no Servidor Web Local (Apache / Nginx / IIS / WAMP / XAMPP) em `http://10.43.225.80/essgtuis_v4`
 
-Para gerar a versão otimizada para execução local contínua:
+O projeto já está configurado com `base: './'` no `vite.config.ts` para funcionar perfeitamente dentro de qualquer subpasta do servidor:
+
+1. Gere o pacote de produção otimizado:
+   ```bash
+   npm run build
+   ```
+2. Uma pasta chamada **`dist/`** será gerada.
+3. Copie todo o conteúdo da pasta `dist/` para a pasta do seu servidor web correspondente ao caminho `/essgtuis_v4` (exemplo: `C:/xampp/htdocs/essgtuis_v4` ou `/var/www/html/essgtuis_v4`).
+4. Acesse diretamente em qualquer computador ou TV da rede através do link:
+   ```
+   http://10.43.225.80/essgtuis_v4/
+   ```
+
+---
+
+### Opção 3: Executar via Node.js Preview na Rede Local
 
 1. Gere o pacote de produção:
    ```bash
    npm run build
    ```
-2. Inicie o servidor de visualização:
+2. Inicie o servidor de pré-visualização integrado:
    ```bash
    npm run preview
    ```
-   *Ou utilizando o servidor `serve`:*
-   ```bash
-   npx serve dist -l 3000
+   *(O servidor iniciará escutando em todos os IPs da rede `0.0.0.0:4173`)*.
+3. Acesse pelo IP do seu servidor:
    ```
-3. Acesse `http://localhost:3000` em seu navegador.
+   http://10.43.225.80:4173/
+   ```
 
 ---
 

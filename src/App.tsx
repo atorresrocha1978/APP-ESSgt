@@ -7,10 +7,11 @@ import React from 'react';
 import { ClinicProvider, useClinic } from './context/ClinicContext';
 import { Navbar } from './components/Navbar';
 import { LoginView } from './components/LoginView';
+import { MainMenuHub } from './components/MainMenuHub';
 import { WaitingRoomTV } from './components/WaitingRoomTV';
 import { ReceptionView } from './components/ReceptionView';
 import { DoctorRoomView } from './components/DoctorRoomView';
-import { AdminUsersView } from './components/AdminUsersView';
+import { AdminDashboardView } from './components/AdminDashboardView';
 import { ManagerReportsView } from './components/ManagerReportsView';
 import { SettingsView } from './components/SettingsView';
 import { CallModalAlert } from './components/CallModalAlert';
@@ -38,10 +39,11 @@ const AppContent: React.FC = () => {
       <Navbar />
 
       <main className="flex-1">
+        {activeTab === 'menu' && <MainMenuHub />}
         {activeTab === 'tv' && <WaitingRoomTV />}
         {activeTab === 'recepcao' && <ReceptionView />}
         {activeTab === 'consultorios' && <DoctorRoomView />}
-        {activeTab === 'usuarios' && <AdminUsersView />}
+        {(activeTab === 'admin' || activeTab === 'usuarios') && <AdminDashboardView />}
         {activeTab === 'gestao' && <ManagerReportsView />}
         {activeTab === 'configuracoes' && <SettingsView />}
       </main>

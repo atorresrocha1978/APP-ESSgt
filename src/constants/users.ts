@@ -3,17 +3,17 @@ import { User } from '../types';
 export const DEFAULT_USERS: User[] = [
   {
     id: 'usr-admin',
-    name: 'Administrador da Clínica',
+    name: 'Administrador da UIS',
     username: 'admin',
-    password: '123',
+    password: 'E$$gt@1936',
     role: 'admin',
-    specialty: 'Gestão Hospitalar & Coordenação',
+    specialty: 'Gestão Geral da UIS & Coordenação',
     assignedRoomId: 'all',
-    email: 'admin@medifila.com.br',
+    email: 'admin@essgt.policiamilitar.sp.gov.br',
     phone: '(11) 98765-4321',
     active: true,
     createdAt: '2026-01-01T08:00:00.000Z',
-    avatarBg: 'bg-blue-600'
+    avatarBg: 'bg-indigo-600'
   },
   {
     id: 'usr-dr-roberto',

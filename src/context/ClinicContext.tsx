@@ -4,6 +4,7 @@ import {
   CallNotification, 
   AttendanceRecord, 
   RoomId, 
+  RoomConfig,
   AudioSettings, 
   ClinicMetrics, 
   Priority, 
@@ -30,14 +31,21 @@ interface ClinicContextType {
   quickLoginAsUser: (userId: string) => void;
   enterTvModeDirectly: () => void;
 
+  // Rooms Management
+  rooms: Record<string, RoomConfig>;
+  roomList: RoomConfig[];
+  addRoom: (roomData: Omit<RoomConfig, 'id'> & { id?: string }) => RoomConfig;
+  updateRoom: (id: string, roomData: Partial<RoomConfig>) => void;
+  deleteRoom: (id: string) => void;
+
   patients: Patient[];
   currentCall: CallNotification | null;
   callHistory: CallNotification[];
   attendanceRecords: AttendanceRecord[];
   activeRoomId: RoomId;
   setActiveRoomId: (id: RoomId) => void;
-  activeTab: 'tv' | 'recepcao' | 'consultorios' | 'gestao' | 'configuracoes' | 'usuarios';
-  setActiveTab: (tab: 'tv' | 'recepcao' | 'consultorios' | 'gestao' | 'configuracoes' | 'usuarios') => void;
+  activeTab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios';
+  setActiveTab: (tab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios') => void;
   audioSettings: AudioSettings;
   updateAudioSettings: (settings: Partial<AudioSettings>) => void;
   
@@ -55,6 +63,8 @@ interface ClinicContextType {
     insurance?: string;
     notes?: string;
   }) => Patient;
+  updatePatient: (id: string, data: Partial<Patient>) => void;
+  deletePatient: (id: string) => void;
   
   callPatient: (patientId: string, customRoomId?: RoomId) => Promise<void>;
   recallPatient: (patientId: string) => Promise<void>;
@@ -91,7 +101,8 @@ const STORAGE_KEYS = {
   AUDIO: 'medifila_audio_settings_v1',
   ACTIVE_ROOM: 'medifila_active_room_v1',
   USERS: 'medifila_users_v1',
-  CURRENT_USER: 'medifila_current_user_v1'
+  CURRENT_USER: 'medifila_current_user_v1',
+  ROOMS: 'medifila_rooms_v1'
 };
 
 const DEFAULT_AUDIO: AudioSettings = {
@@ -104,11 +115,46 @@ const DEFAULT_AUDIO: AudioSettings = {
 };
 
 export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Rooms state with localStorage persistence
+  const [rooms, setRooms] = useState<Record<string, RoomConfig>>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.ROOMS);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && Object.keys(parsed).length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return ROOMS;
+  });
+
+  const roomList = useMemo(() => Object.values(rooms), [rooms]);
+
   // State initialization with localStorage fallback
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.USERS);
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+      try {
+        const parsed: User[] = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Always ensure the administrator account has username 'admin' and password 'E$$gt@1936'
+          return parsed.map(u => {
+            if (u.username.toLowerCase() === 'admin' || u.id === 'usr-admin' || u.role === 'admin') {
+              return {
+                ...u,
+                username: 'admin',
+                password: 'E$$gt@1936'
+              };
+            }
+            return u;
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
     return DEFAULT_USERS;
   });
@@ -149,10 +195,10 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isCallingAnimation, setIsCallingAnimation] = useState<boolean>(false);
   const [activeRoomId, setActiveRoomId] = useState<RoomId>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.ACTIVE_ROOM) as RoomId;
-    return saved && ROOMS[saved] ? saved : 'consultorio_01';
+    return saved || 'consultorio_01';
   });
 
-  const [activeTab, setActiveTab] = useState<'tv' | 'recepcao' | 'consultorios' | 'gestao' | 'configuracoes' | 'usuarios'>('recepcao');
+  const [activeTab, setActiveTab] = useState<'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios'>('menu');
 
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AUDIO);
@@ -195,6 +241,10 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem(STORAGE_KEYS.ACTIVE_ROOM, activeRoomId);
   }, [activeRoomId]);
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.ROOMS, JSON.stringify(rooms));
+  }, [rooms]);
+
   // BroadcastChannel for cross-tab multi-screen real-time synchronization
   useEffect(() => {
     let channel: BroadcastChannel | null = null;
@@ -214,7 +264,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
               payload.call.ticketNumber,
               payload.call.patientName,
               payload.call.roomName,
-              ROOMS[payload.call.roomId]?.subname,
+              (rooms[payload.call.roomId] || ROOMS[payload.call.roomId])?.subname,
               payload.volume,
               payload.voiceEnabled,
               payload.voiceVolume
@@ -231,7 +281,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return () => {
       channel?.close();
     };
-  }, []);
+  }, [rooms]);
 
   const broadcastCall = (call: CallNotification) => {
     try {
@@ -256,6 +306,41 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setAudioSettings(prev => ({ ...prev, ...newSettings }));
   };
 
+  // Rooms CRUD Management
+  const addRoom = useCallback((roomData: Omit<RoomConfig, 'id'> & { id?: string }): RoomConfig => {
+    const cleanId = (roomData.id?.trim() || `sala_${Date.now()}`).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const newRoom: RoomConfig = {
+      ...roomData,
+      id: cleanId
+    };
+    setRooms(prev => ({
+      ...prev,
+      [cleanId]: newRoom
+    }));
+    return newRoom;
+  }, []);
+
+  const updateRoom = useCallback((id: string, roomData: Partial<RoomConfig>) => {
+    setRooms(prev => {
+      if (!prev[id]) return prev;
+      return {
+        ...prev,
+        [id]: {
+          ...prev[id],
+          ...roomData
+        }
+      };
+    });
+  }, []);
+
+  const deleteRoom = useCallback((id: string) => {
+    setRooms(prev => {
+      const copy = { ...prev };
+      delete copy[id];
+      return copy;
+    });
+  }, []);
+
   // Authentication & User Management
   const login = useCallback((username: string, password: string): { success: boolean; message?: string; user?: User } => {
     const cleanUser = username.trim().toLowerCase();
@@ -270,25 +355,21 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return { success: false, message: 'Esta conta de usuário está inativa. Contate o administrador.' };
     }
 
-    // Check password (default fallback to '123' or '123456' or 'admin123' or exact match)
-    if (foundUser.password && foundUser.password !== cleanPass && cleanPass !== '123' && cleanPass !== '123456') {
+    // Strict password verification (demo fallback removed)
+    if (foundUser.password && foundUser.password !== cleanPass) {
       return { success: false, message: 'Senha incorreta. Verifique suas credenciais.' };
     }
 
     setCurrentUser(foundUser);
 
-    // Auto route to appropriate screen based on role
-    if (foundUser.role === 'medico' || foundUser.role === 'dentista' || foundUser.role === 'enfermeiro') {
-      setActiveTab('consultorios');
+    // Auto route: TV goes to 'tv', all other users arrive at the requested Menu de Acesso ao Sistema ('menu')
+    if (foundUser.role === 'painel_tv') {
+      setActiveTab('tv');
+    } else {
+      setActiveTab('menu');
       if (foundUser.assignedRoomId && foundUser.assignedRoomId !== 'all') {
         setActiveRoomId(foundUser.assignedRoomId);
       }
-    } else if (foundUser.role === 'recepcao') {
-      setActiveTab('recepcao');
-    } else if (foundUser.role === 'admin') {
-      setActiveTab('usuarios');
-    } else if (foundUser.role === 'painel_tv') {
-      setActiveTab('tv');
     }
 
     return { success: true, user: foundUser };
@@ -296,23 +377,24 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const logout = useCallback(() => {
     setCurrentUser(null);
+    setActiveTab('menu');
   }, []);
 
   const quickLoginAsUser = useCallback((userId: string) => {
     const targetUser = users.find(u => u.id === userId);
+    // Security: Admin account requires full authentication with username 'admin' and password 'E$$gt@1936'
+    if (targetUser?.role === 'admin') {
+      return;
+    }
     if (targetUser && targetUser.active) {
       setCurrentUser(targetUser);
-      if (targetUser.role === 'medico' || targetUser.role === 'dentista' || targetUser.role === 'enfermeiro') {
-        setActiveTab('consultorios');
+      if (targetUser.role === 'painel_tv') {
+        setActiveTab('tv');
+      } else {
+        setActiveTab('menu');
         if (targetUser.assignedRoomId && targetUser.assignedRoomId !== 'all') {
           setActiveRoomId(targetUser.assignedRoomId);
         }
-      } else if (targetUser.role === 'recepcao') {
-        setActiveTab('recepcao');
-      } else if (targetUser.role === 'admin') {
-        setActiveTab('usuarios');
-      } else if (targetUser.role === 'painel_tv') {
-        setActiveTab('tv');
       }
     }
   }, [users]);
@@ -378,6 +460,15 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }));
   }, [currentUser]);
 
+  // Patients Management
+  const updatePatient = useCallback((id: string, data: Partial<Patient>) => {
+    setPatients(prev => prev.map(p => (p.id === id ? { ...p, ...data } : p)));
+  }, []);
+
+  const deletePatient = useCallback((id: string) => {
+    setPatients(prev => prev.filter(p => p.id !== id));
+  }, []);
+
   // Add new patient in Reception
   const addPatient = (data: {
     rank?: MilitaryRank | string;
@@ -392,7 +483,24 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     insurance?: string;
     notes?: string;
   }): Patient => {
-    const room = ROOMS[data.targetRoomId];
+    const room = rooms[data.targetRoomId] || ROOMS[data.targetRoomId] || {
+      id: data.targetRoomId,
+      name: 'Consultório',
+      subname: 'Atendimento',
+      description: 'Atendimento Geral',
+      category: 'clinico' as const,
+      prefix: 'CON',
+      colorName: 'blue',
+      bgLight: 'bg-blue-50',
+      borderLight: 'border-blue-200',
+      textDark: 'text-blue-900',
+      badgeBg: 'bg-blue-600',
+      badgeText: 'text-white',
+      glowColor: 'rgba(37, 99, 235, 0.4)',
+      defaultDoctor: 'Profissional de Saúde',
+      soundType: 'clinico',
+      icon: 'Stethoscope'
+    };
     
     // Generate sequential ticket based on room prefix + count today
     const existingCount = patients.filter(p => p.targetRoomId === data.targetRoomId).length + 1;
@@ -430,7 +538,24 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (!targetPatient) return;
 
     const roomId = customRoomId || targetPatient.targetRoomId;
-    const room = ROOMS[roomId];
+    const room = rooms[roomId] || ROOMS[roomId] || {
+      id: roomId,
+      name: 'Consultório',
+      subname: 'Atendimento',
+      description: 'Atendimento Geral',
+      category: 'clinico' as const,
+      prefix: 'CON',
+      colorName: 'blue',
+      bgLight: 'bg-blue-50',
+      borderLight: 'border-blue-200',
+      textDark: 'text-blue-900',
+      badgeBg: 'bg-blue-600',
+      badgeText: 'text-white',
+      glowColor: 'rgba(37, 99, 235, 0.4)',
+      defaultDoctor: 'Profissional de Saúde',
+      soundType: 'clinico',
+      icon: 'Stethoscope'
+    };
     const nowIso = new Date().toISOString();
 
     const callNotification: CallNotification = {
@@ -600,7 +725,11 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const now = new Date();
     const registered = new Date(targetPatient.registeredAt);
     const waitTime = Math.max(1, Math.round((now.getTime() - registered.getTime()) / 60000));
-    const room = ROOMS[targetPatient.targetRoomId];
+    const room = rooms[targetPatient.targetRoomId] || ROOMS[targetPatient.targetRoomId] || {
+      name: 'Consultório',
+      category: 'clinico' as const,
+      defaultDoctor: 'Profissional'
+    };
 
     const newRecord: AttendanceRecord = {
       id: `rec-abs-${Date.now()}`,
@@ -647,7 +776,9 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const transferPatient = (patientId: string, newRoomId: RoomId) => {
-    const room = ROOMS[newRoomId];
+    const room = rooms[newRoomId] || ROOMS[newRoomId] || {
+      category: 'clinico' as const
+    };
     setPatients(prev => prev.map(p => {
       if (p.id === patientId) {
         return {
@@ -665,7 +796,11 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const testRoomSound = async (roomId: RoomId) => {
-    const room = ROOMS[roomId];
+    const room = rooms[roomId] || ROOMS[roomId] || {
+      prefix: 'CON',
+      name: 'Consultório',
+      subname: 'Atendimento'
+    };
     await soundService.announcePatient(
       roomId,
       `${room.prefix}-001`,
@@ -730,16 +865,9 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ? Math.round((totalAttended / (totalAttended + totalAbsent)) * 100)
       : 100;
 
-    // Room breakdown
-    const byRoom: Record<RoomId, { count: number; avgWait: number; avgAttendance: number }> = {
-      consultorio_01: { count: 0, avgWait: 0, avgAttendance: 0 },
-      consultorio_02: { count: 0, avgWait: 0, avgAttendance: 0 },
-      medicacao: { count: 0, avgWait: 0, avgAttendance: 0 },
-      odonto_01: { count: 0, avgWait: 0, avgAttendance: 0 },
-      odonto_02: { count: 0, avgWait: 0, avgAttendance: 0 }
-    };
-
-    (Object.keys(byRoom) as RoomId[]).forEach(rId => {
+    // Room breakdown (dynamic from rooms state)
+    const byRoom: Record<string, { count: number; avgWait: number; avgAttendance: number }> = {};
+    Object.keys(rooms).forEach(rId => {
       const roomRecs = attendedRecords.filter(r => r.roomId === rId);
       byRoom[rId] = {
         count: roomRecs.length,
@@ -803,16 +931,18 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       byHour,
       byDay
     };
-  }, [attendanceRecords, patients]);
+  }, [attendanceRecords, patients, rooms]);
 
   const resetToDefaultData = () => {
     setPatients(INITIAL_PATIENTS);
     setAttendanceRecords(generateSeedRecords());
     setCallHistory([]);
     setCurrentCall(null);
+    setRooms(ROOMS);
     localStorage.removeItem(STORAGE_KEYS.PATIENTS);
     localStorage.removeItem(STORAGE_KEYS.RECORDS);
     localStorage.removeItem(STORAGE_KEYS.CALL_HISTORY);
+    localStorage.removeItem(STORAGE_KEYS.ROOMS);
   };
 
   const clearQueue = () => {
@@ -836,6 +966,11 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toggleUserStatus,
     quickLoginAsUser,
     enterTvModeDirectly,
+    rooms,
+    roomList,
+    addRoom,
+    updateRoom,
+    deleteRoom,
     patients,
     currentCall,
     callHistory,
@@ -847,6 +982,8 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     audioSettings,
     updateAudioSettings,
     addPatient,
+    updatePatient,
+    deletePatient,
     callPatient,
     recallPatient,
     startConsultation,
@@ -872,6 +1009,11 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toggleUserStatus,
     quickLoginAsUser,
     enterTvModeDirectly,
+    rooms,
+    roomList,
+    addRoom,
+    updateRoom,
+    deleteRoom,
     patients,
     currentCall,
     callHistory,
@@ -879,6 +1021,9 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     activeRoomId,
     activeTab,
     audioSettings,
+    addPatient,
+    updatePatient,
+    deletePatient,
     callPatient,
     getMetrics,
     isCallingAnimation

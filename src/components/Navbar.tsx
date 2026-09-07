@@ -11,9 +11,10 @@ import {
   Users, 
   Activity,
   LogOut,
-  ShieldCheck,
+  ShieldCheck, 
   User as UserIcon,
-  ChevronDown
+  ChevronDown,
+  LayoutGrid
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { ROOMS } from '../constants/rooms';
@@ -23,6 +24,7 @@ export const Navbar: React.FC = () => {
     activeTab, 
     setActiveTab, 
     patients, 
+    rooms,
     activeRoomId, 
     audioSettings, 
     updateAudioSettings,
@@ -44,16 +46,20 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const waitingCount = patients.filter(p => p.status === 'aguardando').length;
-  const activeRoom = ROOMS[activeRoomId];
+  const activeRoom = (rooms && rooms[activeRoomId]) || ROOMS[activeRoomId] || { prefix: 'CON', name: 'Consultório' };
 
   return (
     <header className="bg-white/95 backdrop-blur-md border-b border-sky-100 sticky top-0 z-40 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-2">
           
-          {/* Logo & Clinic Brand */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-200">
+          {/* Logo & Clinic Brand (clicking goes to Menu) */}
+          <div 
+            onClick={() => setActiveTab('menu')}
+            className="flex items-center gap-3 shrink-0 cursor-pointer group"
+            title="Ir para o Menu Principal"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-200 group-hover:scale-105 transition-transform">
               <Activity className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
@@ -74,19 +80,16 @@ export const Navbar: React.FC = () => {
           {/* Main Navigation Tabs */}
           <nav className="flex items-center gap-1 bg-sky-50/80 p-1.5 rounded-2xl border border-sky-100 overflow-x-auto max-w-full">
             <button
-              id="nav-tab-tv"
-              onClick={() => setActiveTab('tv')}
+              id="nav-tab-menu"
+              onClick={() => setActiveTab('menu')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'tv'
+                activeTab === 'menu'
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              <Tv className={`w-3.5 h-3.5 ${activeTab === 'tv' ? 'text-white' : 'text-blue-600'}`} />
-              <span>Painel TV</span>
-              {currentCall && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              )}
+              <LayoutGrid className={`w-3.5 h-3.5 ${activeTab === 'menu' ? 'text-white' : 'text-blue-600'}`} />
+              <span>Menu</span>
             </button>
 
             <button
@@ -110,6 +113,22 @@ export const Navbar: React.FC = () => {
             </button>
 
             <button
+              id="nav-tab-tv"
+              onClick={() => setActiveTab('tv')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'tv'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              }`}
+            >
+              <Tv className={`w-3.5 h-3.5 ${activeTab === 'tv' ? 'text-white' : 'text-indigo-600'}`} />
+              <span>Painel TV</span>
+              {currentCall && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              )}
+            </button>
+
+            <button
               id="nav-tab-consultorios"
               onClick={() => setActiveTab('consultorios')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
@@ -118,7 +137,7 @@ export const Navbar: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              <Stethoscope className={`w-3.5 h-3.5 ${activeTab === 'consultorios' ? 'text-white' : 'text-indigo-600'}`} />
+              <Stethoscope className={`w-3.5 h-3.5 ${activeTab === 'consultorios' ? 'text-white' : 'text-emerald-600'}`} />
               <span>Consultórios</span>
               <span className={`hidden lg:inline text-[9px] px-1.5 py-0.2 rounded font-mono font-black ${
                 activeTab === 'consultorios' ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-700'
@@ -128,16 +147,16 @@ export const Navbar: React.FC = () => {
             </button>
 
             <button
-              id="nav-tab-usuarios"
-              onClick={() => setActiveTab('usuarios')}
+              id="nav-tab-admin"
+              onClick={() => setActiveTab('admin')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === 'usuarios'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                activeTab === 'admin' || activeTab === 'usuarios'
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-200'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              <Users className={`w-3.5 h-3.5 ${activeTab === 'usuarios' ? 'text-white' : 'text-indigo-600'}`} />
-              <span>Profissionais</span>
+              <ShieldCheck className={`w-3.5 h-3.5 ${activeTab === 'admin' || activeTab === 'usuarios' ? 'text-white' : 'text-purple-600'}`} />
+              <span>Administrador</span>
             </button>
 
             <button
@@ -149,7 +168,7 @@ export const Navbar: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
-              <BarChart3 className={`w-3.5 h-3.5 ${activeTab === 'gestao' ? 'text-white' : 'text-emerald-600'}`} />
+              <BarChart3 className={`w-3.5 h-3.5 ${activeTab === 'gestao' ? 'text-white' : 'text-slate-600'}`} />
               <span>Relatórios</span>
             </button>
 

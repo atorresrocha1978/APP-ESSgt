@@ -24,6 +24,7 @@ import { RoomId } from '../types';
 
 export const WaitingRoomTV: React.FC = () => {
   const { 
+    rooms,
     currentCall, 
     callHistory, 
     patients, 
@@ -258,7 +259,7 @@ export const WaitingRoomTV: React.FC = () => {
               <div className="flex gap-6 sm:gap-8 items-center min-w-max">
                 {callHistory.length > 0 ? (
                   callHistory.slice(0, 5).map((call, idx) => {
-                    const room = ROOMS[call.roomId];
+                    const room = (rooms && rooms[call.roomId]) || ROOMS[call.roomId];
                     return (
                       <div key={call.id + idx} className="flex flex-col">
                         <span className={`text-lg sm:text-xl font-black font-mono ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>
@@ -313,7 +314,7 @@ export const WaitingRoomTV: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
               {waitingPatients.length > 0 ? (
                 waitingPatients.map((p, idx) => {
-                  const room = ROOMS[p.targetRoomId];
+                  const room = (rooms && rooms[p.targetRoomId]) || ROOMS[p.targetRoomId];
                   const isFirst = idx === 0;
 
                   return (

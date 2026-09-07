@@ -53,12 +53,6 @@ export const LoginView: React.FC = () => {
     }, 250);
   };
 
-  const handleFillCredentials = (userLogin: string, pass: string = '123') => {
-    setUsername(userLogin);
-    setPassword(pass);
-    setErrorMessage(null);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100/50 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 text-slate-800 font-sans">
       
@@ -132,14 +126,9 @@ export const LoginView: React.FC = () => {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
-                    Senha de Acesso
-                  </label>
-                  <span className="text-[11px] font-semibold text-blue-600">
-                    Senha padrão demo: <strong className="font-mono">123</strong>
-                  </span>
-                </div>
+                <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Senha de Acesso
+                </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <KeyRound className="w-4 h-4" />
@@ -343,7 +332,13 @@ export const LoginView: React.FC = () => {
 
                 {/* Painel Administrativo */}
                 <button
-                  onClick={() => quickLoginAsUser('usr-admin')}
+                  onClick={() => {
+                    setUsername('admin');
+                    setPassword('');
+                    setErrorMessage(null);
+                    const pwdEl = document.getElementById('input-login-password');
+                    pwdEl?.focus();
+                  }}
                   className="w-full p-3 rounded-2xl bg-indigo-50/70 hover:bg-indigo-600 hover:text-white border border-indigo-200/80 transition-all text-left flex items-center justify-between group cursor-pointer shadow-2xs"
                 >
                   <div className="flex items-center gap-3">
@@ -356,11 +351,11 @@ export const LoginView: React.FC = () => {
                           Painel Administrativo & Gestão
                         </span>
                         <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-100 group-hover:bg-indigo-400 text-indigo-800 group-hover:text-white">
-                          ADMIN
+                          REQUER SENHA
                         </span>
                       </div>
                       <p className="text-[11px] font-medium text-slate-500 group-hover:text-indigo-100">
-                        Cadastrar Usuários, Relatórios e Métricas
+                        Clique para preencher o login &quot;admin&quot; e digitar a senha
                       </p>
                     </div>
                   </div>

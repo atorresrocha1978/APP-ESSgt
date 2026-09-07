@@ -64,7 +64,7 @@ export const AdminUsersView: React.FC = () => {
   }>({
     name: '',
     username: '',
-    password: '123',
+    password: '',
     role: 'medico',
     councilType: 'CRM',
     councilNumber: '',
@@ -108,7 +108,7 @@ export const AdminUsersView: React.FC = () => {
     setFormData({
       name: '',
       username: '',
-      password: '123',
+      password: '',
       role: 'medico',
       councilType: 'CRM',
       councilNumber: '',
@@ -127,7 +127,7 @@ export const AdminUsersView: React.FC = () => {
     setFormData({
       name: user.name,
       username: user.username,
-      password: user.password || '123',
+      password: user.password || '',
       role: user.role,
       councilType: user.councilType || 'CRM',
       councilNumber: user.councilNumber || '',
@@ -180,6 +180,11 @@ export const AdminUsersView: React.FC = () => {
       return;
     }
 
+    if (!formData.password.trim()) {
+      setFormError('Por favor, defina a senha de acesso para este usuário.');
+      return;
+    }
+
     // Check if username already exists (except for current editing user)
     const exists = users.some(
       u => u.username.toLowerCase() === formData.username.trim().toLowerCase() && u.id !== editingUserId
@@ -209,7 +214,7 @@ export const AdminUsersView: React.FC = () => {
       addUser({
         name: formData.name.trim(),
         username: formData.username.trim(),
-        password: formData.password.trim() || '123',
+        password: formData.password.trim(),
         role: formData.role,
         councilType: formData.councilType,
         councilNumber: formData.councilNumber.trim() || undefined,
@@ -787,7 +792,7 @@ export const AdminUsersView: React.FC = () => {
                       required
                       value={formData.password}
                       onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                      placeholder="Ex: 123456"
+                      placeholder="Defina a senha de acesso"
                       className="w-full px-3.5 py-2 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                     />
                   </div>
