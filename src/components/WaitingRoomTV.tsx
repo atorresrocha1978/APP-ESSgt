@@ -83,9 +83,12 @@ export const WaitingRoomTV: React.FC = () => {
         isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-sky-100 shadow-sm'
       }`}>
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-200 text-white shrink-0">
-            <Activity className="h-7 w-7 stroke-[2.5]" />
-          </div>
+          <img 
+            src="/brasao_essgt.png" 
+            alt="Brasão ESSgt" 
+            referrerPolicy="no-referrer"
+            className="w-12 h-14 sm:w-14 sm:h-16 object-contain drop-shadow-md shrink-0" 
+          />
           <div>
             <div className="flex items-center gap-2">
               <h1 className={`text-xl sm:text-2xl font-black leading-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>

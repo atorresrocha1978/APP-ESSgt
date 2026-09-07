@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 980" width="700" height="980">
+  <defs>
+    <!-- Clip path for the Shield -->
+    <clipPath id="shield-clip">
+      <path d="M 150,330 L 550,330 L 550,600 C 550,710 440,780 350,810 C 260,780 150,710 150,600 Z" />
+    </clipPath>
+
+    <!-- Clip path for Quarter 1 (Cross) -->
+    <clipPath id="q1-clip">
+      <rect x="150" y="330" width="200" height="195" />
+    </clipPath>
+
+    <!-- Clip path for Quarter 2 (Swords) -->
+    <clipPath id="q2-clip">
+      <rect x="350" y="330" width="200" height="195" />
+    </clipPath>
+
+    <!-- Clip path for Quarter 3 (Stripes + 2) -->
+    <clipPath id="q3-clip">
+      <path d="M 150,525 L 350,525 L 350,810 C 260,780 150,710 150,600 Z" />
+    </clipPath>
+
+    <!-- Clip path for Quarter 4 (BG) -->
+    <clipPath id="q4-clip">
+      <path d="M 350,525 L 550,525 L 550,600 C 550,710 440,780 350,810 Z" />
+    </clipPath>
+
+    <!-- Ribbon text path -->
+    <path id="ribbon-text-path" d="M 175,910 Q 350,850 525,910" fill="none" />
+  </defs>
+
+  <!-- ==================== 1. PLUME / FEATHERS (PENACHO) ==================== -->
+  <g id="feathers" stroke="#1A1A1A" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Blue Feathers (Top & Upper Left) -->
+    <path d="M 335,90 C 320,60 350,30 380,25 C 415,20 440,45 440,75 C 455,45 490,40 515,65 C 540,90 535,130 500,150 C 530,135 565,155 570,190 C 575,225 540,260 500,255 C 530,265 540,300 515,320 C 490,340 455,330 445,305 L 415,235 C 400,200 370,160 335,90 Z" fill="#272378" />
+
+    <!-- Red Feathers (Foreground & Right Cluster) -->
+    <path d="M 360,95 C 375,55 425,45 455,75 C 475,95 470,125 450,140 C 480,120 520,130 535,160 C 550,190 530,225 500,235 C 535,235 560,265 550,300 C 540,335 505,350 470,340 C 495,360 490,395 460,405 C 430,415 405,395 400,370 C 390,345 375,300 360,250 Z" fill="#B32126" />
+    
+    <!-- Red Accent Curls -->
+    <path d="M 420,70 C 450,85 460,120 440,145 C 470,130 500,150 505,185 C 510,215 485,240 455,245 C 485,255 500,285 480,315 C 460,340 430,335 410,310" fill="#BA2227" />
+  </g>
+
+  <!-- ==================== 2. HELMET (ELMO) ==================== -->
+  <g id="helmet" stroke="#1A1A1A" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Skull / Dome of the helmet -->
+    <path d="M 330,240 C 315,190 335,130 380,105 C 420,80 475,95 505,140 C 525,170 525,210 500,245 C 475,280 440,300 400,305 C 360,310 335,280 330,240 Z" fill="#B9BDC4" />
+
+    <!-- Dome highlight -->
+    <path d="M 350,210 C 340,170 360,130 395,115 C 430,100 465,110 485,140 C 470,125 435,120 405,135 C 375,150 355,180 350,210 Z" fill="#DCE0E6" stroke="none" />
+
+    <!-- Helmet Crest Rim -->
+    <path d="M 375,108 C 410,95 450,102 485,128" fill="none" stroke="#7A808A" stroke-width="4" />
+
+    <!-- Visor Faceplate -->
+    <path d="M 345,185 C 350,155 385,140 430,140 C 460,140 480,165 480,195 C 480,225 455,250 420,250 C 375,250 345,225 345,185 Z" fill="#C5CAD1" />
+
+    <!-- Visor Slits (Grades) -->
+    <g stroke="#1A1A1A" stroke-width="3" fill="none">
+      <path d="M 360,182 C 362,170 370,162 380,158" />
+      <path d="M 372,192 C 375,175 385,162 400,156" />
+      <path d="M 387,202 C 390,180 402,165 418,158" />
+      <path d="M 402,210 C 407,185 420,170 438,162" />
+      <path d="M 418,218 C 423,192 438,175 456,168" />
+      <path d="M 436,222 C 440,198 454,182 470,176" />
+      <path d="M 454,222 C 457,205 466,192 478,186" />
+    </g>
+
+    <!-- Visor Pivot Hinge -->
+    <circle cx="468" cy="195" r="14" fill="#B0B5BD" stroke="#1A1A1A" stroke-width="3" />
+    <circle cx="468" cy="195" r="7" fill="#E2E5E9" stroke="#1A1A1A" stroke-width="2.5" />
+
+    <!-- Chin strap / Red cord -->
+    <path d="M 375,305 C 410,325 460,310 495,270" fill="none" stroke="#E3242B" stroke-width="6" stroke-linecap="round" />
+
+    <!-- Gorget / Flared Collar (Pescoço/Gola) -->
+    <path d="M 365,300 L 330,345 C 345,390 380,395 425,365 C 470,335 520,360 550,340 L 515,290 C 480,315 420,325 365,300 Z" fill="#B1B6BE" />
+    
+    <!-- Golden Trim on Collar Base -->
+    <path d="M 330,345 C 345,390 380,395 425,365 C 470,335 520,360 550,340 C 515,350 465,320 425,350 C 385,380 350,370 330,345 Z" fill="#B57F26" stroke="#8A5E16" stroke-width="2" />
+  </g>
+
+  <!-- ==================== 3. MAIN SHIELD (ESCUDO) ==================== -->
+  <!-- Shield Outer Shadow & Background -->
+  <g id="shield-body">
+    <!-- Shield Fill (Silver/Grey Base) -->
+    <path d="M 150,330 L 550,330 L 550,600 C 550,710 440,780 350,810 C 260,780 150,710 150,600 Z" fill="#CCD0D4" stroke="#1A1A1A" stroke-width="5" stroke-linejoin="round" />
+
+    <!-- ==================== QUARTER 1: LATIN CROSS ==================== -->
+    <g clip-path="url(#q1-clip)">
+      <rect x="150" y="330" width="200" height="195" fill="#CCD0D4" />
+      <!-- Latin Cross (Navy Blue) -->
+      <path d="M 227,360 L 273,360 L 273,405 L 320,405 L 320,450 L 273,450 L 273,525 L 227,525 L 227,450 L 180,450 L 180,405 L 227,405 Z" fill="#242377" />
+    </g>
+
+    <!-- ==================== QUARTER 2: CROSSED SWORDS ==================== -->
+    <g clip-path="url(#q2-clip)">
+      <!-- Blue Base Field -->
+      <rect x="350" y="330" width="200" height="195" fill="#242377" />
+      <!-- Red Triangles (Top & Saltire) -->
+      <polygon points="350,330 550,330 450,427" fill="#A12228" />
+      
+      <!-- Crossed Swords (Em Aspa) -->
+      <g stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round">
+        <!-- Sword 1 (Top-Left to Bottom-Right) -->
+        <!-- Blade -->
+        <path d="M 370,350 L 525,485 L 518,493 L 363,358 Z" fill="#FFFFFF" />
+        <!-- Sword 2 (Top-Right to Bottom-Left) -->
+        <!-- Blade -->
+        <path d="M 530,350 L 375,485 L 382,493 L 537,358 Z" fill="#FFFFFF" />
+
+        <!-- Sword 1 Hilt (Bottom-Right) -->
+        <path d="M 515,480 L 535,500 L 545,490 L 525,470 Z" fill="#C8CDD4" />
+        <!-- Handle & Guard -->
+        <path d="M 528,495 C 532,505 540,515 545,515 C 550,510 545,495 538,488" fill="#B35F28" stroke="#1A1A1A" stroke-width="2.5" />
+
+        <!-- Sword 2 Hilt (Bottom-Left) -->
+        <path d="M 385,480 L 365,500 L 355,490 L 375,470 Z" fill="#C8CDD4" />
+        <!-- Handle & Guard -->
+        <path d="M 372,495 C 368,505 360,515 355,515 C 350,510 355,495 362,488" fill="#B35F28" stroke="#1A1A1A" stroke-width="2.5" />
+      </g>
+    </g>
+
+    <!-- ==================== QUARTER 3: 13 DIAGONAL STRIPES + NUMBER 2 ==================== -->
+    <g clip-path="url(#q3-clip)">
+      <rect x="150" y="525" width="200" height="285" fill="#CCD0D4" />
+      <!-- 13 Red Slanted Stripes (Diagonal Paulista) -->
+      <g stroke="#A62228" stroke-width="16" stroke-linecap="butt">
+        <line x1="120" y1="540" x2="380" y2="440" />
+        <line x1="120" y1="575" x2="380" y2="475" />
+        <line x1="120" y1="610" x2="380" y2="510" />
+        <line x1="120" y1="645" x2="380" y2="545" />
+        <line x1="120" y1="680" x2="380" y2="580" />
+        <line x1="120" y1="715" x2="380" y2="615" />
+        <line x1="120" y1="750" x2="380" y2="650" />
+        <line x1="120" y1="785" x2="380" y2="685" />
+        <line x1="120" y1="820" x2="380" y2="720" />
+      </g>
+
+      <!-- Number 2 (Golden / Ochre Bronze) -->
+      <g transform="translate(205, 545)">
+        <!-- Clean vector glyph for bold Numeral '2' -->
+        <path d="M 12,32 C 12,12 32,0 55,0 C 78,0 95,14 95,35 C 95,54 82,70 65,85 L 35,112 L 98,112 L 98,138 L 8,138 L 8,114 L 46,78 C 60,65 68,52 68,36 C 68,23 58,18 48,18 C 36,18 28,26 28,36 Z" fill="#B27B24" />
+      </g>
+    </g>
+
+    <!-- ==================== QUARTER 4: MONOGRAM B. G. ==================== -->
+    <g clip-path="url(#q4-clip)">
+      <rect x="350" y="525" width="200" height="285" fill="#CCD0D4" />
+      <!-- Ornate "B. G." in Navy Blue -->
+      <g transform="translate(380, 645)" fill="#242377">
+        <!-- Calligraphic B with flourish -->
+        <path d="M 10,75 C 15,77 22,78 30,78 C 55,78 68,68 68,52 C 68,40 60,32 46,30 C 58,26 64,16 64,6 C 64,-8 52,-18 32,-18 L -5,-18 L -5,72 C -18,74 -22,65 -22,58 L -26,58 C -26,72 -14,80 5,80 L 10,75 Z M 12,24 L 28,24 C 42,24 50,30 50,44 C 50,58 40,64 25,64 L 12,64 Z M 12,-6 L 26,-6 C 38,-6 46,0 46,12 C 46,20 38,24 24,24 L 12,24 Z" />
+        <!-- Dot 1 -->
+        <circle cx="78" cy="74" r="6" />
+
+        <!-- Calligraphic G -->
+        <path d="M 140,78 C 115,78 98,62 98,32 C 98,2 118,-18 145,-18 C 165,-18 178,-8 184,4 L 170,12 C 166,4 156,-2 144,-2 C 128,-2 116,12 116,32 C 116,52 126,64 142,64 C 154,64 162,56 165,48 L 145,48 L 145,34 L 182,34 L 182,72 C 172,76 158,78 140,78 Z" />
+        <!-- Dot 2 -->
+        <circle cx="196" cy="74" r="6" />
+      </g>
+    </g>
+
+    <!-- Dividing Cross Lines inside Shield -->
+    <line x1="150" y1="525" x2="550" y2="525" stroke="#1A1A1A" stroke-width="4" />
+    <line x1="350" y1="330" x2="350" y2="810" stroke="#1A1A1A" stroke-width="4" />
+
+    <!-- Shield Outer Rim Highlight -->
+    <path d="M 150,330 L 550,330 L 550,600 C 550,710 440,780 350,810 C 260,780 150,710 150,600 Z" fill="none" stroke="#1A1A1A" stroke-width="4.5" />
+  </g>
+
+  <!-- ==================== 4. RED BANNER / RIBBON (LISTEL ESSgt) ==================== -->
+  <g id="ribbon">
+    <!-- Ribbon Fold Shadow (Underneath / Back folds) -->
+    <path d="M 160,860 L 110,880 L 140,940 L 195,910 Z" fill="#881318" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round" />
+    <path d="M 540,860 L 590,880 L 560,940 L 505,910 Z" fill="#881318" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round" />
+
+    <!-- Ribbon Swallowtails (Left & Right Ends) -->
+    <!-- Left Tail -->
+    <path d="M 160,860 C 130,865 90,875 30,865 C 50,890 70,915 90,950 C 120,945 150,935 170,920 L 140,940 L 110,880 Z" fill="#CC2128" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round" />
+    <path d="M 30,865 L 85,905 L 90,950 C 70,915 50,890 30,865 Z" fill="#AA191E" />
+
+    <!-- Right Tail -->
+    <path d="M 540,860 C 570,865 610,875 670,865 C 650,890 630,915 610,950 C 580,945 550,935 530,920 L 560,940 L 590,880 Z" fill="#CC2128" stroke="#1A1A1A" stroke-width="3" stroke-linejoin="round" />
+    <path d="M 670,865 L 615,905 L 610,950 C 630,915 650,890 670,865 Z" fill="#AA191E" />
+
+    <!-- Main Front Ribbon Arc -->
+    <path d="M 140,865 C 240,810 460,810 560,865 C 550,915 480,945 350,945 C 220,945 150,915 140,865 Z" fill="#D3222A" stroke="#1A1A1A" stroke-width="3.5" stroke-linejoin="round" />
+
+    <!-- Upper Lip Accent -->
+    <path d="M 145,868 C 245,815 455,815 555,868" fill="none" stroke="#EA454C" stroke-width="2.5" />
+
+    <!-- Text "E S S g t" (Crisp Bold White Heraldic Type) -->
+    <!-- Using individual curved text glyphs aligned along the arc -->
+    <g font-family="Arial, 'Helvetica Neue', Helvetica, sans-serif" font-size="52" font-weight="900" fill="#FFFFFF" text-anchor="middle">
+      <text transform="translate(235, 888) rotate(-14)">E</text>
+      <text transform="translate(295, 876) rotate(-7)">S</text>
+      <text transform="translate(352, 872) rotate(0)">S</text>
+      <text transform="translate(412, 876) rotate(8)">g</text>
+      <text transform="translate(470, 888) rotate(16)">t</text>
+    </g>
+  </g>
+
+</svg>

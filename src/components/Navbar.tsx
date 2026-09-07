@@ -61,9 +61,12 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-3 shrink-0 cursor-pointer group"
             title="Ir para o Menu Principal"
           >
-            <div className="w-10 h-10 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-200 group-hover:scale-105 transition-transform">
-              <Activity className="w-5 h-5 stroke-[2.5]" />
-            </div>
+            <img 
+              src="/brasao_essgt.png" 
+              alt="Brasão ESSgt" 
+              referrerPolicy="no-referrer"
+              className="w-10 h-12 object-contain drop-shadow-md group-hover:scale-110 transition-transform" 
+            />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-lg sm:text-xl tracking-tight text-slate-800">
