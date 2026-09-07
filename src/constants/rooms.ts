@@ -15,7 +15,7 @@ export const ROOMS: Record<RoomId, RoomConfig> = {
     badgeBg: 'bg-blue-600',
     badgeText: 'text-white',
     glowColor: 'rgba(37, 99, 235, 0.4)',
-    defaultDoctor: 'Dr. Roberto Silveira (Clínico)',
+    defaultDoctor: 'Dr. Roberto Silveira',
     soundType: 'clinico',
     icon: 'Stethoscope'
   },
@@ -33,7 +33,7 @@ export const ROOMS: Record<RoomId, RoomConfig> = {
     badgeBg: 'bg-purple-600',
     badgeText: 'text-white',
     glowColor: 'rgba(147, 51, 234, 0.4)',
-    defaultDoctor: 'Dra. Mariana Vasconcelos (Cardiologia)',
+    defaultDoctor: 'Dra. Mariana Vasconcelos',
     soundType: 'especialidade',
     icon: 'Sparkles'
   },
@@ -51,7 +51,7 @@ export const ROOMS: Record<RoomId, RoomConfig> = {
     badgeBg: 'bg-amber-600',
     badgeText: 'text-white',
     glowColor: 'rgba(217, 119, 6, 0.4)',
-    defaultDoctor: 'Enfª. Camila Duarte (Enfermagem)',
+    defaultDoctor: 'Enfª. Camila Duarte',
     soundType: 'medicacao',
     icon: 'Syringe'
   },
@@ -69,7 +69,7 @@ export const ROOMS: Record<RoomId, RoomConfig> = {
     badgeBg: 'bg-teal-600',
     badgeText: 'text-white',
     glowColor: 'rgba(13, 148, 136, 0.4)',
-    defaultDoctor: 'Dr. Lucas Ferreira (Cirurgião Dentista)',
+    defaultDoctor: 'Dr. Lucas Ferreira',
     soundType: 'odonto1',
     icon: 'Smile'
   },
@@ -87,7 +87,7 @@ export const ROOMS: Record<RoomId, RoomConfig> = {
     badgeBg: 'bg-cyan-700',
     badgeText: 'text-white',
     glowColor: 'rgba(14, 116, 144, 0.4)',
-    defaultDoctor: 'Dra. Beatriz Mendes (Endodontista)',
+    defaultDoctor: 'Dra. Beatriz Mendes',
     soundType: 'odonto2',
     icon: 'ShieldCheck'
   }

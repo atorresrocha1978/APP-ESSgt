@@ -24,13 +24,18 @@ import {
   UserCheck,
   RotateCcw,
   Activity,
-  Layers
+  Layers,
+  Award,
+  Shield,
+  HeartPulse,
+  Check,
+  Bookmark
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { RoomConfig, RoomCategory, RoomId, MilitaryRank, Priority, Patient } from '../types';
 import { AdminUsersView } from './AdminUsersView';
 
-type AdminTab = 'consultorios' | 'usuarios' | 'pacientes';
+type AdminTab = 'consultorios' | 'usuarios' | 'pacientes' | 'tabelas_apoio';
 
 export const AdminDashboardView: React.FC = () => {
   const { 
@@ -44,7 +49,19 @@ export const AdminDashboardView: React.FC = () => {
     addPatient,
     updatePatient,
     deletePatient,
-    callPatient
+    callPatient,
+    militaryRanks,
+    addMilitaryRank,
+    updateMilitaryRank,
+    deleteMilitaryRank,
+    opms,
+    addOpm,
+    updateOpm,
+    deleteOpm,
+    healthInsurances,
+    addHealthInsurance,
+    updateHealthInsurance,
+    deleteHealthInsurance
   } = useClinic();
 
   const [activeSubTab, setActiveSubTab] = useState<AdminTab>('consultorios');
@@ -178,22 +195,24 @@ export const AdminDashboardView: React.FC = () => {
     setIsRoomModalOpen(false);
   };
 
+  // Confirmation Modals State
+  const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
+  const [roomToDelete, setRoomToDelete] = useState<RoomConfig | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'rank' | 'opm' | 'insurance'; name: string } | null>(null);
+
   const handleDeleteRoom = (room: RoomConfig) => {
     if (roomList.length <= 1) {
-      alert('Não é possível excluir o único consultório do sistema.');
+      showToast('Não é possível excluir o único consultório do sistema.');
       return;
     }
-    if (window.confirm(`Tem certeza que deseja excluir o consultório "${room.name}"?`)) {
-      deleteRoom(room.id);
-      showToast(`Consultório "${room.name}" removido.`);
-    }
+    setRoomToDelete(room);
   };
 
   // ==========================================
   // 2. CADASTRO DE PACIENTE STATE & LOGIC
   // ==========================================
   const [patientForm, setPatientForm] = useState<{
-    rank: MilitaryRank | 'Civil';
+    rank: string;
     re: string;
     name: string;
     document: string;
@@ -218,9 +237,60 @@ export const AdminDashboardView: React.FC = () => {
     notes: ''
   });
 
+  // Quick inline creation state for patient registration form
+  const [isAddingCustomRank, setIsAddingCustomRank] = useState(false);
+  const [newRankInput, setNewRankInput] = useState('');
+
+  const [isAddingCustomOpm, setIsAddingCustomOpm] = useState(false);
+  const [newOpmInput, setNewOpmInput] = useState('');
+
+  const [isAddingCustomInsurance, setIsAddingCustomInsurance] = useState(false);
+  const [newInsuranceInput, setNewInsuranceInput] = useState('');
+
+  // Support table management sub-tab states (Postos, OPMs, Assistência à Saúde)
+  const [supportSearch, setSupportSearch] = useState('');
+  const [editingRankItem, setEditingRankItem] = useState<{ oldName: string; newName: string } | null>(null);
+  const [editingOpmItem, setEditingOpmItem] = useState<{ oldName: string; newName: string } | null>(null);
+  const [editingInsuranceItem, setEditingInsuranceItem] = useState<{ oldName: string; newName: string } | null>(null);
+
+  const [supportNewRank, setSupportNewRank] = useState('');
+  const [supportNewOpm, setSupportNewOpm] = useState('');
+  const [supportNewInsurance, setSupportNewInsurance] = useState('');
+
   const [patientSearch, setPatientSearch] = useState('');
   const [patientFilterRoom, setPatientFilterRoom] = useState('all');
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+
+  // Quick addition handlers
+  const handleQuickAddRank = () => {
+    const val = newRankInput.trim();
+    if (!val) return;
+    addMilitaryRank(val);
+    setPatientForm(prev => ({ ...prev, rank: val }));
+    setNewRankInput('');
+    setIsAddingCustomRank(false);
+    showToast(`Posto/Graduação "${val}" criado com sucesso.`);
+  };
+
+  const handleQuickAddOpm = () => {
+    const val = newOpmInput.trim();
+    if (!val) return;
+    addOpm(val);
+    setPatientForm(prev => ({ ...prev, opm: val }));
+    setNewOpmInput('');
+    setIsAddingCustomOpm(false);
+    showToast(`OPM "${val}" criada com sucesso.`);
+  };
+
+  const handleQuickAddInsurance = () => {
+    const val = newInsuranceInput.trim();
+    if (!val) return;
+    addHealthInsurance(val);
+    setPatientForm(prev => ({ ...prev, insurance: val }));
+    setNewInsuranceInput('');
+    setIsAddingCustomInsurance(false);
+    showToast(`Assistência à Saúde "${val}" criada com sucesso.`);
+  };
 
   const handleCreatePatient = (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,17 +299,32 @@ export const AdminDashboardView: React.FC = () => {
       return;
     }
 
+    const finalRank = patientForm.rank.trim() || 'Sd PM';
+    const finalOpm = patientForm.opm.trim() || 'ESSgt';
+    const finalInsurance = patientForm.insurance.trim() || 'CMed / CBPM';
+
+    // Auto register custom values if not in list
+    if (finalRank && !militaryRanks.includes(finalRank)) {
+      addMilitaryRank(finalRank);
+    }
+    if (finalOpm && !opms.includes(finalOpm)) {
+      addOpm(finalOpm);
+    }
+    if (finalInsurance && !healthInsurances.includes(finalInsurance)) {
+      addHealthInsurance(finalInsurance);
+    }
+
     const created = addPatient({
-      rank: patientForm.rank,
-      re: patientForm.re.trim() || (patientForm.rank === 'Civil' ? 'CIVIL' : '000000-0'),
+      rank: finalRank,
+      re: patientForm.re.trim() || (finalRank === 'Civil' ? 'CIVIL' : '000000-0'),
       name: patientForm.name.trim(),
       document: patientForm.document.trim() || patientForm.re.trim() || '---',
       age: patientForm.age ? parseInt(patientForm.age, 10) : undefined,
       gender: patientForm.gender,
-      opm: patientForm.opm.trim() || 'ESSgt',
+      opm: finalOpm,
       priority: patientForm.priority,
       targetRoomId: patientForm.targetRoomId,
-      insurance: patientForm.insurance.trim() || 'CMed / CBPM',
+      insurance: finalInsurance,
       notes: patientForm.notes.trim()
     });
 
@@ -247,16 +332,16 @@ export const AdminDashboardView: React.FC = () => {
 
     // Reset form
     setPatientForm({
-      rank: 'Sd PM',
+      rank: militaryRanks[0] || 'Sd PM',
       re: '',
       name: '',
       document: '',
       age: '',
       gender: 'M',
-      opm: 'ESSgt',
+      opm: opms[0] || 'ESSgt',
       priority: 'normal',
       targetRoomId: roomList[0]?.id || 'consultorio_01',
-      insurance: 'CMed / CBPM',
+      insurance: healthInsurances[0] || 'CMed / CBPM',
       notes: ''
     });
   };
@@ -265,17 +350,33 @@ export const AdminDashboardView: React.FC = () => {
     e.preventDefault();
     if (!editingPatient) return;
 
+    const finalRank = editingPatient.rank?.trim() || 'Sd PM';
+    const finalOpm = editingPatient.opm?.trim() || 'ESSgt';
+    const finalInsurance = editingPatient.insurance?.trim() || 'CMed / CBPM';
+
+    if (finalRank && !militaryRanks.includes(finalRank)) {
+      addMilitaryRank(finalRank);
+    }
+    if (finalOpm && !opms.includes(finalOpm)) {
+      addOpm(finalOpm);
+    }
+    if (finalInsurance && !healthInsurances.includes(finalInsurance)) {
+      addHealthInsurance(finalInsurance);
+    }
+
     updatePatient(editingPatient.id, {
       name: editingPatient.name,
-      rank: editingPatient.rank,
+      rank: finalRank,
       re: editingPatient.re,
-      opm: editingPatient.opm,
+      opm: finalOpm,
+      insurance: finalInsurance,
       priority: editingPatient.priority,
       targetRoomId: editingPatient.targetRoomId,
+      status: editingPatient.status,
       notes: editingPatient.notes
     });
 
-    showToast(`Dados do paciente ${editingPatient.name} atualizados.`);
+    showToast(`Dados do paciente ${editingPatient.name} atualizados com sucesso.`);
     setEditingPatient(null);
   };
 
@@ -374,6 +475,22 @@ export const AdminDashboardView: React.FC = () => {
             <span>3. Cadastro de Paciente</span>
             <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 font-mono">
               {patients.length}
+            </span>
+          </button>
+
+          <button
+            id="admin-tab-tabelas-apoio"
+            onClick={() => setActiveSubTab('tabelas_apoio')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'tabelas_apoio'
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/40'
+                : 'bg-purple-950/60 text-purple-200 hover:bg-purple-900/60 hover:text-white'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>4. Postos, OPMs & Assistência à Saúde</span>
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/20 font-mono">
+              {militaryRanks.length + opms.length + healthInsurances.length}
             </span>
           </button>
         </div>
@@ -669,7 +786,7 @@ export const AdminDashboardView: React.FC = () => {
           
           {/* Patient Registration Form */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-slate-200/80 shadow-sm">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-slate-100 gap-3">
               <div>
                 <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
                   <UserPlus className="w-6 h-6 text-purple-600" />
@@ -679,37 +796,90 @@ export const AdminDashboardView: React.FC = () => {
                   Cadastre policiais militares e dependentes civis para atendimento imediato na Unidade Integrada de Saúde.
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('tabelas_apoio')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs border border-purple-200 transition-colors cursor-pointer self-start sm:self-auto"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                Gerenciar Lista de Postos, OPMs e Convênios
+              </button>
             </div>
 
             <form onSubmit={handleCreatePatient} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Posto / Graduação */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Posto / Graduação *
-                  </label>
-                  <select
-                    value={patientForm.rank}
-                    onChange={(e) => setPatientForm({ ...patientForm, rank: e.target.value as any })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  >
-                    <option value="Cel">Cel PM</option>
-                    <option value="Ten Cel">Ten Cel PM</option>
-                    <option value="Maj">Maj PM</option>
-                    <option value="Cap">Cap PM</option>
-                    <option value="1º Ten">1º Ten PM</option>
-                    <option value="2º Ten">2º Ten PM</option>
-                    <option value="Subten">Subten PM</option>
-                    <option value="1º Sgt">1º Sgt PM</option>
-                    <option value="2º Sgt">2º Sgt PM</option>
-                    <option value="3º Sgt">3º Sgt PM</option>
-                    <option value="Cb PM">Cb PM</option>
-                    <option value="Sd PM">Sd PM</option>
-                    <option value="Al Of">Al Of PM</option>
-                    <option value="Al Sgt">Al Sgt PM</option>
-                    <option value="Civil">Dependente Civil</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Posto / Graduação *
+                    </label>
+                    {!isAddingCustomRank && (
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingCustomRank(true)}
+                        className="text-[11px] text-purple-600 hover:text-purple-800 font-bold cursor-pointer"
+                      >
+                        + Criar Novo
+                      </button>
+                    )}
+                  </div>
+
+                  {isAddingCustomRank ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={newRankInput}
+                        onChange={(e) => setNewRankInput(e.target.value)}
+                        placeholder="Ex: Aluno CFO"
+                        className="flex-1 px-3 py-2 rounded-xl border border-purple-300 text-xs font-bold text-purple-950 bg-purple-50/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleQuickAddRank}
+                        className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold cursor-pointer"
+                        title="Salvar Posto"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingCustomRank(false);
+                          setNewRankInput('');
+                        }}
+                        className="p-2 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-xl text-xs cursor-pointer"
+                        title="Cancelar"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={patientForm.rank}
+                      onChange={(e) => {
+                        if (e.target.value === '__NEW_RANK__') {
+                          setIsAddingCustomRank(true);
+                        } else {
+                          setPatientForm({ ...patientForm, rank: e.target.value });
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {militaryRanks.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                      <option value="__NEW_RANK__" className="font-bold text-purple-600">
+                        + Cadastrar Novo Posto / Graduação...
+                      </option>
+                    </select>
+                  )}
                 </div>
 
+                {/* RE Militar / Documento */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     RE Militar / Documento *
@@ -724,6 +894,7 @@ export const AdminDashboardView: React.FC = () => {
                   />
                 </div>
 
+                {/* Nome Completo */}
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Nome Completo do Paciente *
@@ -740,19 +911,78 @@ export const AdminDashboardView: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* OPM / Unidade */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    OPM / Unidade Militar
-                  </label>
-                  <input
-                    type="text"
-                    value={patientForm.opm}
-                    onChange={(e) => setPatientForm({ ...patientForm, opm: e.target.value })}
-                    placeholder="Ex: ESSgt, 1º BPChq, CPA/M"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">
+                      OPM / Unidade Militar *
+                    </label>
+                    {!isAddingCustomOpm && (
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingCustomOpm(true)}
+                        className="text-[11px] text-purple-600 hover:text-purple-800 font-bold cursor-pointer"
+                      >
+                        + Criar Nova
+                      </button>
+                    )}
+                  </div>
+
+                  {isAddingCustomOpm ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={newOpmInput}
+                        onChange={(e) => setNewOpmInput(e.target.value)}
+                        placeholder="Ex: 45º BPM/I"
+                        className="flex-1 px-3 py-2 rounded-xl border border-purple-300 text-xs font-bold text-purple-950 bg-purple-50/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleQuickAddOpm}
+                        className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold cursor-pointer"
+                        title="Salvar OPM"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingCustomOpm(false);
+                          setNewOpmInput('');
+                        }}
+                        className="p-2 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-xl text-xs cursor-pointer"
+                        title="Cancelar"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={patientForm.opm}
+                      onChange={(e) => {
+                        if (e.target.value === '__NEW_OPM__') {
+                          setIsAddingCustomOpm(true);
+                        } else {
+                          setPatientForm({ ...patientForm, opm: e.target.value });
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {opms.map((o) => (
+                        <option key={o} value={o}>
+                          {o}
+                        </option>
+                      ))}
+                      <option value="__NEW_OPM__" className="font-bold text-purple-600">
+                        + Cadastrar Nova OPM (Unidade)...
+                      </option>
+                    </select>
+                  )}
                 </div>
 
+                {/* Classificação de Prioridade */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Classificação de Prioridade
@@ -768,6 +998,7 @@ export const AdminDashboardView: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Consultório de Destino */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     Consultório de Destino *
@@ -785,17 +1016,75 @@ export const AdminDashboardView: React.FC = () => {
                   </select>
                 </div>
 
+                {/* Assistência à Saúde */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Convênio / Assistência
-                  </label>
-                  <input
-                    type="text"
-                    value={patientForm.insurance}
-                    onChange={(e) => setPatientForm({ ...patientForm, insurance: e.target.value })}
-                    placeholder="CMed / CBPM ou Cruz Azul"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">
+                      Assistência à Saúde *
+                    </label>
+                    {!isAddingCustomInsurance && (
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingCustomInsurance(true)}
+                        className="text-[11px] text-purple-600 hover:text-purple-800 font-bold cursor-pointer"
+                      >
+                        + Criar Nova
+                      </button>
+                    )}
+                  </div>
+
+                  {isAddingCustomInsurance ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={newInsuranceInput}
+                        onChange={(e) => setNewInsuranceInput(e.target.value)}
+                        placeholder="Ex: Bradesco Saúde"
+                        className="flex-1 px-3 py-2 rounded-xl border border-purple-300 text-xs font-bold text-purple-950 bg-purple-50/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleQuickAddInsurance}
+                        className="p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold cursor-pointer"
+                        title="Salvar Assistência"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsAddingCustomInsurance(false);
+                          setNewInsuranceInput('');
+                        }}
+                        className="p-2 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-xl text-xs cursor-pointer"
+                        title="Cancelar"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <select
+                      value={patientForm.insurance}
+                      onChange={(e) => {
+                        if (e.target.value === '__NEW_INSURANCE__') {
+                          setIsAddingCustomInsurance(true);
+                        } else {
+                          setPatientForm({ ...patientForm, insurance: e.target.value });
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      {healthInsurances.map((ins) => (
+                        <option key={ins} value={ins}>
+                          {ins}
+                        </option>
+                      ))}
+                      <option value="__NEW_INSURANCE__" className="font-bold text-purple-600">
+                        + Cadastrar Nova Assistência / Convênio...
+                      </option>
+                    </select>
+                  )}
                 </div>
               </div>
 
@@ -871,6 +1160,7 @@ export const AdminDashboardView: React.FC = () => {
                     <th className="py-3 px-4">Senha</th>
                     <th className="py-3 px-4">Paciente</th>
                     <th className="py-3 px-4">RE / OPM</th>
+                    <th className="py-3 px-4">Assistência</th>
                     <th className="py-3 px-4">Consultório</th>
                     <th className="py-3 px-4">Prioridade</th>
                     <th className="py-3 px-4">Status</th>
@@ -888,11 +1178,17 @@ export const AdminDashboardView: React.FC = () => {
                           </td>
                           <td className="py-3 px-4">
                             <strong className="text-slate-800 font-bold block">{p.name}</strong>
-                            <span className="text-[11px] text-slate-500">{p.rank || 'Militar'}</span>
+                            <span className="text-[11px] text-purple-700 font-bold">{p.rank || 'Militar'}</span>
                           </td>
                           <td className="py-3 px-4 text-slate-600 font-mono">
                             <div>RE: {p.re || '---'}</div>
-                            <div className="text-[10px] text-slate-400 font-sans">{p.opm || 'ESSgt'}</div>
+                            <div className="text-[10px] text-slate-500 font-sans font-bold">{p.opm || 'ESSgt'}</div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+                              <HeartPulse className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <span className="truncate max-w-[120px]">{p.insurance || 'CMed / CBPM'}</span>
+                            </span>
                           </td>
                           <td className="py-3 px-4">
                             <span className="font-bold text-slate-800 block">{room?.name || p.targetRoomId}</span>
@@ -921,14 +1217,14 @@ export const AdminDashboardView: React.FC = () => {
                               <button
                                 onClick={() => callPatient(p.id)}
                                 title="Chamar paciente agora"
-                                className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold"
+                                className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold cursor-pointer"
                               >
                                 <Volume2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setEditingPatient(p)}
                                 title="Editar dados"
-                                className="p-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold"
+                                className="p-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold cursor-pointer"
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
@@ -940,7 +1236,7 @@ export const AdminDashboardView: React.FC = () => {
                                   }
                                 }}
                                 title="Excluir paciente"
-                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600"
+                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -951,7 +1247,7 @@ export const AdminDashboardView: React.FC = () => {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={7} className="text-center py-8 text-slate-400 text-xs">
+                      <td colSpan={8} className="text-center py-8 text-slate-400 text-xs">
                         Nenhum paciente encontrado com os filtros informados.
                       </td>
                     </tr>
@@ -964,14 +1260,19 @@ export const AdminDashboardView: React.FC = () => {
           {/* Modal: Edit Patient */}
           {editingPatient && (
             <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-              <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
+              <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                  <h3 className="text-lg font-black text-slate-900">
-                    Editar Cadastro do Paciente
-                  </h3>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900">
+                      Editar Cadastro do Paciente
+                    </h3>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">
+                      Senha: <span className="font-bold text-purple-700">{editingPatient.ticketNumber}</span>
+                    </p>
+                  </div>
                   <button 
                     onClick={() => setEditingPatient(null)}
-                    className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
+                    className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -979,38 +1280,135 @@ export const AdminDashboardView: React.FC = () => {
 
                 <form onSubmit={handleUpdatePatient} className="space-y-4 mt-4 text-xs">
                   <div>
-                    <label className="block font-bold text-slate-700 mb-1">Nome Completo</label>
+                    <label className="block font-bold text-slate-700 mb-1">Nome Completo do Paciente *</label>
                     <input
                       type="text"
                       required
                       value={editingPatient.name}
                       onChange={(e) => setEditingPatient({ ...editingPatient, name: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-sm text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Posto / Graduação */}
                     <div>
-                      <label className="block font-bold text-slate-700 mb-1">RE Militar</label>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Posto / Graduação
+                      </label>
+                      <div className="space-y-1.5">
+                        <select
+                          value={militaryRanks.includes(editingPatient.rank || '') ? editingPatient.rank : '__CUSTOM__'}
+                          onChange={(e) => {
+                            if (e.target.value === '__CUSTOM__') {
+                              // keep current or open text prompt
+                            } else {
+                              setEditingPatient({ ...editingPatient, rank: e.target.value });
+                            }
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 bg-white"
+                        >
+                          {militaryRanks.map(r => (
+                            <option key={r} value={r}>{r}</option>
+                          ))}
+                          {!militaryRanks.includes(editingPatient.rank || '') && editingPatient.rank && (
+                            <option value="__CUSTOM__">{editingPatient.rank} (Personalizado)</option>
+                          )}
+                        </select>
+                        <input
+                          type="text"
+                          value={editingPatient.rank || ''}
+                          onChange={(e) => setEditingPatient({ ...editingPatient, rank: e.target.value })}
+                          placeholder="Ou digite outro posto..."
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-purple-900 bg-purple-50/40"
+                        />
+                      </div>
+                    </div>
+
+                    {/* RE Militar */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">RE Militar / Documento</label>
                       <input
                         type="text"
                         value={editingPatient.re || ''}
                         onChange={(e) => setEditingPatient({ ...editingPatient, re: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-bold text-slate-700 mb-1">OPM</label>
-                      <input
-                        type="text"
-                        value={editingPatient.opm || ''}
-                        onChange={(e) => setEditingPatient({ ...editingPatient, opm: e.target.value })}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-300"
+                        placeholder="Ex: 123456-7"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono font-bold text-slate-800"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* OPM (Unidade) */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        OPM (Unidade Militar)
+                      </label>
+                      <div className="space-y-1.5">
+                        <select
+                          value={opms.includes(editingPatient.opm || '') ? editingPatient.opm : '__CUSTOM__'}
+                          onChange={(e) => {
+                            if (e.target.value === '__CUSTOM__') {
+                              // keep current or open text prompt
+                            } else {
+                              setEditingPatient({ ...editingPatient, opm: e.target.value });
+                            }
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 bg-white"
+                        >
+                          {opms.map(o => (
+                            <option key={o} value={o}>{o}</option>
+                          ))}
+                          {!opms.includes(editingPatient.opm || '') && editingPatient.opm && (
+                            <option value="__CUSTOM__">{editingPatient.opm} (Personalizada)</option>
+                          )}
+                        </select>
+                        <input
+                          type="text"
+                          value={editingPatient.opm || ''}
+                          onChange={(e) => setEditingPatient({ ...editingPatient, opm: e.target.value })}
+                          placeholder="Ou digite outra OPM..."
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-blue-900 bg-blue-50/40"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Assistência à Saúde */}
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">
+                        Assistência à Saúde / Convênio
+                      </label>
+                      <div className="space-y-1.5">
+                        <select
+                          value={healthInsurances.includes(editingPatient.insurance || '') ? editingPatient.insurance : '__CUSTOM__'}
+                          onChange={(e) => {
+                            if (e.target.value === '__CUSTOM__') {
+                              // keep current
+                            } else {
+                              setEditingPatient({ ...editingPatient, insurance: e.target.value });
+                            }
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 bg-white"
+                        >
+                          {healthInsurances.map(ins => (
+                            <option key={ins} value={ins}>{ins}</option>
+                          ))}
+                          {!healthInsurances.includes(editingPatient.insurance || '') && editingPatient.insurance && (
+                            <option value="__CUSTOM__">{editingPatient.insurance} (Personalizada)</option>
+                          )}
+                        </select>
+                        <input
+                          type="text"
+                          value={editingPatient.insurance || ''}
+                          onChange={(e) => setEditingPatient({ ...editingPatient, insurance: e.target.value })}
+                          placeholder="Ou digite outro convênio..."
+                          className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs text-emerald-900 bg-emerald-50/40"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block font-bold text-slate-700 mb-1">Consultório</label>
                       <select
@@ -1036,19 +1434,46 @@ export const AdminDashboardView: React.FC = () => {
                         <option value="urgente">Urgente</option>
                       </select>
                     </div>
+
+                    <div>
+                      <label className="block font-bold text-slate-700 mb-1">Status Atendimento</label>
+                      <select
+                        value={editingPatient.status}
+                        onChange={(e) => setEditingPatient({ ...editingPatient, status: e.target.value as any })}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800"
+                      >
+                        <option value="aguardando">Aguardando</option>
+                        <option value="chamado">Chamado no Painel</option>
+                        <option value="em_atendimento">Em Atendimento</option>
+                        <option value="concluido">Concluído</option>
+                        <option value="ausente">Ausente</option>
+                        <option value="cancelado">Cancelado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-700 mb-1">Observações / Queixa</label>
+                    <input
+                      type="text"
+                      value={editingPatient.notes || ''}
+                      onChange={(e) => setEditingPatient({ ...editingPatient, notes: e.target.value })}
+                      placeholder="Ex: Queixa de dor, medicação, curativo..."
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs"
+                    />
                   </div>
 
                   <div className="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
                     <button
                       type="button"
                       onClick={() => setEditingPatient(null)}
-                      className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
+                      className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold cursor-pointer transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="px-5 py-2 rounded-xl bg-purple-600 text-white font-bold"
+                      className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold cursor-pointer shadow-md shadow-purple-200 transition-all"
                     >
                       Salvar Alterações
                     </button>
@@ -1057,6 +1482,417 @@ export const AdminDashboardView: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUB-TAB 4: GESTÃO DE POSTOS, OPMS E ASSISTÊNCIA À SAÚDE */}
+      {/* ========================================================================= */}
+      {activeSubTab === 'tabelas_apoio' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold uppercase tracking-wider mb-2">
+                <Layers className="w-3.5 h-3.5" />
+                Tabelas de Apoio do Sistema
+              </div>
+              <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                Postos / Graduações, OPMs e Assistência à Saúde
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+                Crie, edite e organize os dados de referência utilizados no cadastro de pacientes e na recepção da UIS. Todas as alterações são salvas e sincronizadas automaticamente em todo o sistema.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveSubTab('pacientes')}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs transition-all cursor-pointer border border-purple-200"
+              >
+                <UserPlus className="w-4 h-4 text-purple-600" />
+                Ir para Cadastro de Pacientes
+              </button>
+            </div>
+          </div>
+
+          {/* Search / Filter bar for support tables */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+            <Search className="w-4 h-4 text-slate-400 shrink-0" />
+            <input
+              type="text"
+              value={supportSearch}
+              onChange={(e) => setSupportSearch(e.target.value)}
+              placeholder="Filtrar postos, OPMs ou convênios por nome ou sigla..."
+              className="w-full text-xs sm:text-sm bg-transparent border-none focus:outline-none text-slate-800 placeholder:text-slate-400 font-medium"
+            />
+            {supportSearch && (
+              <button
+                onClick={() => setSupportSearch('')}
+                className="text-xs text-slate-400 hover:text-slate-600 px-2 py-1 rounded-md cursor-pointer"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
+          {/* 3 Columns Grid for the 3 support tables */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* COLUMN 1: POSTOS E GRADUAÇÕES */}
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+              <div className="p-5 bg-gradient-to-br from-purple-50 to-indigo-50/50 border-b border-purple-100/80">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900">
+                        Posto / Graduação
+                      </h3>
+                      <p className="text-[11px] text-purple-700 font-bold">
+                        {militaryRanks.length} opções cadastradas
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add new Rank Form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!supportNewRank.trim()) return;
+                    addMilitaryRank(supportNewRank.trim());
+                    showToast(`Posto "${supportNewRank.trim()}" adicionado com sucesso.`);
+                    setSupportNewRank('');
+                  }}
+                  className="mt-4 flex items-center gap-2"
+                >
+                  <input
+                    type="text"
+                    required
+                    value={supportNewRank}
+                    onChange={(e) => setSupportNewRank(e.target.value)}
+                    placeholder="Ex: Aluno CFO, Capelão..."
+                    className="flex-1 px-3 py-2 text-xs bg-white border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 font-bold text-slate-800"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Adicionar
+                  </button>
+                </form>
+              </div>
+
+              {/* Ranks List */}
+              <div className="p-4 flex-1 overflow-y-auto max-h-[500px] divide-y divide-slate-100">
+                {militaryRanks
+                  .filter(r => r.toLowerCase().includes(supportSearch.toLowerCase()))
+                  .map((rank) => (
+                    <div key={rank} className="py-2.5 flex items-center justify-between gap-2 group hover:bg-slate-50/80 px-2 rounded-xl transition-colors">
+                      {editingRankItem?.oldName === rank ? (
+                        <div className="flex items-center gap-2 w-full">
+                          <input
+                            type="text"
+                            value={editingRankItem.newName}
+                            onChange={(e) => setEditingRankItem({ ...editingRankItem, newName: e.target.value })}
+                            className="flex-1 px-2.5 py-1 text-xs border border-purple-300 rounded-lg font-bold text-purple-950 bg-purple-50/50 focus:outline-none"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => {
+                              if (editingRankItem.newName.trim()) {
+                                updateMilitaryRank(editingRankItem.oldName, editingRankItem.newName.trim());
+                                showToast(`Posto renomeado para "${editingRankItem.newName.trim()}".`);
+                              }
+                              setEditingRankItem(null);
+                            }}
+                            className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs cursor-pointer"
+                            title="Salvar"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setEditingRankItem(null)}
+                            className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg text-xs cursor-pointer"
+                            title="Cancelar"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                            <span className="text-xs font-bold text-slate-800">{rank}</span>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setEditingRankItem({ oldName: rank, newName: rank })}
+                              className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                              title="Editar nome"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Deseja realmente remover o posto "${rank}"?`)) {
+                                  deleteMilitaryRank(rank);
+                                  showToast(`Posto "${rank}" removido.`);
+                                }
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* COLUMN 2: OPM (UNIDADE) */}
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+              <div className="p-5 bg-gradient-to-br from-blue-50 to-sky-50/50 border-b border-blue-100/80">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900">
+                        OPM (Unidade Policial)
+                      </h3>
+                      <p className="text-[11px] text-blue-700 font-bold">
+                        {opms.length} unidades cadastradas
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add new OPM Form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!supportNewOpm.trim()) return;
+                    addOpm(supportNewOpm.trim());
+                    showToast(`OPM "${supportNewOpm.trim()}" adicionada com sucesso.`);
+                    setSupportNewOpm('');
+                  }}
+                  className="mt-4 flex items-center gap-2"
+                >
+                  <input
+                    type="text"
+                    required
+                    value={supportNewOpm}
+                    onChange={(e) => setSupportNewOpm(e.target.value)}
+                    placeholder="Ex: 1º BPChq, 45º BPM/I..."
+                    className="flex-1 px-3 py-2 text-xs bg-white border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Adicionar
+                  </button>
+                </form>
+              </div>
+
+              {/* OPMs List */}
+              <div className="p-4 flex-1 overflow-y-auto max-h-[500px] divide-y divide-slate-100">
+                {opms
+                  .filter(o => o.toLowerCase().includes(supportSearch.toLowerCase()))
+                  .map((opm) => (
+                    <div key={opm} className="py-2.5 flex items-center justify-between gap-2 group hover:bg-slate-50/80 px-2 rounded-xl transition-colors">
+                      {editingOpmItem?.oldName === opm ? (
+                        <div className="flex items-center gap-2 w-full">
+                          <input
+                            type="text"
+                            value={editingOpmItem.newName}
+                            onChange={(e) => setEditingOpmItem({ ...editingOpmItem, newName: e.target.value })}
+                            className="flex-1 px-2.5 py-1 text-xs border border-blue-300 rounded-lg font-bold text-blue-950 bg-blue-50/50 focus:outline-none"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => {
+                              if (editingOpmItem.newName.trim()) {
+                                updateOpm(editingOpmItem.oldName, editingOpmItem.newName.trim());
+                                showToast(`OPM renomeada para "${editingOpmItem.newName.trim()}".`);
+                              }
+                              setEditingOpmItem(null);
+                            }}
+                            className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs cursor-pointer"
+                            title="Salvar"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setEditingOpmItem(null)}
+                            className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg text-xs cursor-pointer"
+                            title="Cancelar"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            <span className="text-xs font-bold text-slate-800 font-mono">{opm}</span>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setEditingOpmItem({ oldName: opm, newName: opm })}
+                              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                              title="Editar nome"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Deseja realmente remover a OPM "${opm}"?`)) {
+                                  deleteOpm(opm);
+                                  showToast(`OPM "${opm}" removida.`);
+                                }
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* COLUMN 3: ASSISTÊNCIA À SAÚDE */}
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+              <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50/50 border-b border-emerald-100/80">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                      <HeartPulse className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900">
+                        Assistência à Saúde
+                      </h3>
+                      <p className="text-[11px] text-emerald-700 font-bold">
+                        {healthInsurances.length} convênios cadastrados
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add new Insurance Form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!supportNewInsurance.trim()) return;
+                    addHealthInsurance(supportNewInsurance.trim());
+                    showToast(`Assistência "${supportNewInsurance.trim()}" adicionada com sucesso.`);
+                    setSupportNewInsurance('');
+                  }}
+                  className="mt-4 flex items-center gap-2"
+                >
+                  <input
+                    type="text"
+                    required
+                    value={supportNewInsurance}
+                    onChange={(e) => setSupportNewInsurance(e.target.value)}
+                    placeholder="Ex: CMed / CBPM, Cruz Azul..."
+                    className="flex-1 px-3 py-2 text-xs bg-white border border-emerald-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-slate-800"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 shrink-0 transition-all cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Adicionar
+                  </button>
+                </form>
+              </div>
+
+              {/* Insurances List */}
+              <div className="p-4 flex-1 overflow-y-auto max-h-[500px] divide-y divide-slate-100">
+                {healthInsurances
+                  .filter(ins => ins.toLowerCase().includes(supportSearch.toLowerCase()))
+                  .map((ins) => (
+                    <div key={ins} className="py-2.5 flex items-center justify-between gap-2 group hover:bg-slate-50/80 px-2 rounded-xl transition-colors">
+                      {editingInsuranceItem?.oldName === ins ? (
+                        <div className="flex items-center gap-2 w-full">
+                          <input
+                            type="text"
+                            value={editingInsuranceItem.newName}
+                            onChange={(e) => setEditingInsuranceItem({ ...editingInsuranceItem, newName: e.target.value })}
+                            className="flex-1 px-2.5 py-1 text-xs border border-emerald-300 rounded-lg font-bold text-emerald-950 bg-emerald-50/50 focus:outline-none"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => {
+                              if (editingInsuranceItem.newName.trim()) {
+                                updateHealthInsurance(editingInsuranceItem.oldName, editingInsuranceItem.newName.trim());
+                                showToast(`Assistência renomeada para "${editingInsuranceItem.newName.trim()}".`);
+                              }
+                              setEditingInsuranceItem(null);
+                            }}
+                            className="p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs cursor-pointer"
+                            title="Salvar"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setEditingInsuranceItem(null)}
+                            className="p-1.5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-lg text-xs cursor-pointer"
+                            title="Cancelar"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span className="text-xs font-bold text-slate-800">{ins}</span>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setEditingInsuranceItem({ oldName: ins, newName: ins })}
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                              title="Editar nome"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Deseja realmente remover o plano "${ins}"?`)) {
+                                  deleteHealthInsurance(ins);
+                                  showToast(`Assistência "${ins}" removida.`);
+                                }
+                              }}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                              title="Excluir"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+          </div>
         </div>
       )}
 

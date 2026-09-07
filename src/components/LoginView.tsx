@@ -15,12 +15,17 @@ import {
   Sparkles,
   AlertCircle,
   KeyRound,
-  CheckCircle2
+  CheckCircle2,
+  BookOpen
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { ROOMS } from '../constants/rooms';
 
-export const LoginView: React.FC = () => {
+interface LoginViewProps {
+  onOpenManual?: () => void;
+}
+
+export const LoginView: React.FC<LoginViewProps> = ({ onOpenManual }) => {
   const { login, quickLoginAsUser, users, enterTvModeDirectly } = useClinic();
 
   const [username, setUsername] = useState<string>('');
@@ -370,6 +375,31 @@ export const LoginView: React.FC = () => {
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Você pode cadastrar e gerenciar novos médicos, dentistas e enfermeiros no Painel Administrativo.</span>
             </div>
+
+            {/* Link to Operational Manual in A4 PDF */}
+            {onOpenManual && (
+              <button
+                type="button"
+                onClick={onOpenManual}
+                id="btn-login-open-manual"
+                className="w-full p-3 rounded-2xl bg-white hover:bg-red-50 border border-slate-200 hover:border-red-300 text-slate-700 hover:text-red-700 transition-all flex items-center justify-between group cursor-pointer shadow-2xs"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold shrink-0">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <span className="text-xs font-bold block text-slate-800 group-hover:text-red-700">
+                      Manual de Operação do Usuário (PDF / A4)
+                    </span>
+                    <span className="text-[10px] text-slate-500 block">
+                      Consulte o guia oficial com procedimentos, triagem e telas do sistema
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-red-600 transition-transform group-hover:translate-x-1 shrink-0" />
+              </button>
+            )}
 
           </div>
 

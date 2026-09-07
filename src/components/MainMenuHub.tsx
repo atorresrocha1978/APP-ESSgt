@@ -19,10 +19,13 @@ import {
   AlertCircle,
   Building2,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  BookOpen,
+  Download
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { RoomId } from '../types';
+import { generatePdfManual } from '../utils/generatePdfManual';
 
 export const MainMenuHub: React.FC = () => {
   const { 
@@ -366,6 +369,62 @@ export const MainMenuHub: React.FC = () => {
                 Acessar Administração <ArrowRight className="w-4 h-4" />
               </span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Official Operational Manual (PDF A4) Banner */}
+      <div className="bg-gradient-to-r from-red-950 via-slate-900 to-blue-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-red-900/40 relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-80 h-80 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/20 border border-red-500/30 text-red-300 text-xs font-bold uppercase tracking-wider">
+              <BookOpen className="w-3.5 h-3.5" />
+              Documentação Oficial • Formato A4 (210 × 297 mm)
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              Manual de Operação do Usuário (PDF / A4)
+            </h3>
+
+            <p className="text-sm text-slate-300 font-normal leading-relaxed">
+              Guia completo de procedimentos padrão (POP) para operação do sistema da UIS: login seguro com senha estrita, triagem militar de militares e dependentes, operação da TV com sintetizador de voz, atendimento nos consultórios e administração de salas.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-slate-400 font-semibold">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300">
+                ✓ Capa Oficial PMESP
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300">
+                ✓ 6 Páginas Diagramadas
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300">
+                ✓ Pronto para Impressão & Download
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch lg:items-center gap-3 shrink-0">
+            <button
+              id="btn-hub-view-manual"
+              onClick={() => setActiveTab('manual')}
+              className="px-5 py-3 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-white/10"
+              title="Abrir Manual Interativo na Tela"
+            >
+              <BookOpen className="w-4 h-4 text-red-600" />
+              <span>Visualizar Manual A4</span>
+            </button>
+
+            <button
+              id="btn-hub-download-manual-pdf"
+              onClick={generatePdfManual}
+              className="px-5 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-900/40"
+              title="Baixar Arquivo PDF em Tamanho A4"
+            >
+              <Download className="w-4 h-4" />
+              <span>Baixar PDF (A4)</span>
+            </button>
           </div>
         </div>
       </div>

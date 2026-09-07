@@ -94,6 +94,14 @@ export const COMMON_OPMS = [
   'Outra OPM'
 ];
 
+export const DEFAULT_HEALTH_INSURANCES = [
+  'CMed / CBPM',
+  'Cruz Azul de SP',
+  'SUS',
+  'Particular',
+  'IAMSPE'
+];
+
 export type PatientStatus = 
   | 'aguardando' 
   | 'chamado' 

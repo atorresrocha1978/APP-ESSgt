@@ -17,7 +17,9 @@ import {
   Share2, 
   UserCheck,
   Send,
-  Plus
+  Plus,
+  User,
+  ChevronDown
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { ROOMS, ROOM_LIST } from '../constants/rooms';
@@ -34,10 +36,57 @@ export const DoctorRoomView: React.FC = () => {
     finishConsultation, 
     markAbsent,
     testRoomSound,
-    currentUser
+    currentUser,
+    users,
+    rooms,
+    roomList
   } = useClinic();
 
-  const activeRoom = ROOMS[activeRoomId];
+  const currentRoomList = (roomList && roomList.length > 0) ? roomList : ROOM_LIST;
+  const activeRoom = (rooms && rooms[activeRoomId]) || ROOMS[activeRoomId] || currentRoomList[0];
+
+  // Dedicated doctor assigned specifically to this room in users list
+  const assignedDoctor = users.find(
+    u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro') && u.assignedRoomId === activeRoomId
+  ) || users.find(
+    u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro') && u.assignedRoomId === 'all'
+  );
+
+  // List of all active healthcare professionals registered in the system
+  const allMedicalStaff = users.filter(
+    u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro')
+  );
+
+  // Optional manual switch for attending professional
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
+
+  // When room changes, clear manual doctor selection
+  useEffect(() => {
+    setSelectedDoctorId(null);
+  }, [activeRoomId]);
+
+  // Determine effective attending professional
+  const effectiveDoctor = (() => {
+    if (selectedDoctorId) {
+      const doc = users.find(u => u.id === selectedDoctorId);
+      if (doc) return doc;
+    }
+    if (currentUser && (currentUser.role === 'medico' || currentUser.role === 'dentista' || currentUser.role === 'enfermeiro') && (currentUser.assignedRoomId === activeRoomId || currentUser.assignedRoomId === 'all')) {
+      return currentUser;
+    }
+    if (assignedDoctor) {
+      return assignedDoctor;
+    }
+    return null;
+  })();
+
+  const doctorDisplayName = effectiveDoctor 
+    ? effectiveDoctor.name 
+    : (activeRoom.defaultDoctor || 'Profissional de Saúde');
+
+  const doctorSubtitle = effectiveDoctor
+    ? `${effectiveDoctor.councilNumber ? `${effectiveDoctor.councilType || 'CRM'} ${effectiveDoctor.councilNumber} • ` : ''}${effectiveDoctor.specialty || activeRoom.description}`
+    : (activeRoom.description || activeRoom.subname);
 
   // Consultation state
   const [consultationNotes, setConsultationNotes] = useState('');
@@ -118,10 +167,16 @@ export const DoctorRoomView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
-          {ROOM_LIST.map((room) => {
+          {currentRoomList.map((room) => {
             const isSelected = activeRoomId === room.id;
             const waitingCount = patients.filter(p => p.targetRoomId === room.id && p.status === 'aguardando').length;
             
+            // Find registered doctor for this room
+            const assignedDocForRoom = users.find(
+              u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro') && u.assignedRoomId === room.id
+            );
+            const docName = assignedDocForRoom ? assignedDocForRoom.name : (room.defaultDoctor || 'Plantão');
+
             return (
               <button
                 key={room.id}
@@ -130,21 +185,27 @@ export const DoctorRoomView: React.FC = () => {
                   setActiveRoomId(room.id);
                   setConsultationNotes('');
                 }}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-black transition-all cursor-pointer ${
+                className={`flex flex-col items-start px-4 py-2.5 rounded-2xl text-left transition-all cursor-pointer ${
                   isSelected
                     ? `${room.badgeBg} ${room.badgeText} shadow-lg shadow-blue-200 ring-2 ring-blue-400/40`
                     : 'bg-sky-50/70 text-slate-700 hover:bg-sky-100 border border-sky-100'
                 }`}
               >
-                <span>{room.name}</span>
-                <span className="text-[11px] opacity-80 hidden md:inline">({room.subname})</span>
-                {waitingCount > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    isSelected ? 'bg-white text-slate-900 shadow-xs' : 'bg-blue-200 text-blue-900'
-                  }`}>
-                    {waitingCount}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  <span className="font-black text-xs sm:text-sm">{room.name}</span>
+                  {waitingCount > 0 && (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                      isSelected ? 'bg-white text-slate-900 shadow-xs' : 'bg-blue-200 text-blue-900'
+                    }`}>
+                      {waitingCount}
+                    </span>
+                  )}
+                </div>
+                <div className={`text-[11px] font-bold truncate max-w-[180px] ${
+                  isSelected ? 'opacity-90 text-white' : 'text-blue-700'
+                }`}>
+                  {docName}
+                </div>
               </button>
             );
           })}
@@ -154,7 +215,7 @@ export const DoctorRoomView: React.FC = () => {
         <button
           id="btn-test-room-audio"
           onClick={() => testRoomSound(activeRoomId)}
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-50 text-blue-700 hover:bg-blue-600 hover:text-white text-xs font-black border border-sky-200 transition-colors shadow-xs cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-sky-50 text-blue-700 hover:bg-blue-600 hover:text-white text-xs font-black border border-sky-200 transition-colors shadow-xs cursor-pointer"
           title="Testar sinal sonoro personalizado deste consultório"
         >
           <Volume2 className="w-4 h-4 stroke-[2.5]" />
@@ -170,20 +231,45 @@ export const DoctorRoomView: React.FC = () => {
           <div className="bg-white rounded-3xl border border-sky-100 p-6 sm:p-7 shadow-sm flex flex-col justify-between min-h-[480px]">
             
             {/* Header info of the room */}
-            <div className="flex items-center justify-between border-b border-sky-100 pb-4">
+            <div className="flex items-start sm:items-center justify-between border-b border-sky-100 pb-4 flex-wrap gap-3">
               <div>
-                <span className={`inline-block px-3 py-1 rounded-xl text-xs font-black uppercase ${activeRoom.badgeBg} ${activeRoom.badgeText} mb-1 shadow-xs`}>
-                  {activeRoom.name} • {activeRoom.subname}
-                </span>
-                <h2 className="text-xl font-black text-slate-800 tracking-tight">
-                  {currentUser && (currentUser.role === 'medico' || currentUser.role === 'dentista' || currentUser.role === 'enfermeiro') && (currentUser.assignedRoomId === activeRoomId || currentUser.assignedRoomId === 'all')
-                    ? currentUser.name
-                    : activeRoom.defaultDoctor}
-                </h2>
-                <p className="text-xs font-semibold text-slate-400">
-                  {currentUser && currentUser.councilNumber && (currentUser.assignedRoomId === activeRoomId || currentUser.assignedRoomId === 'all')
-                    ? `${currentUser.councilType} ${currentUser.councilNumber} • ${currentUser.specialty || activeRoom.description}`
-                    : activeRoom.description}
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <span className={`inline-block px-3 py-1 rounded-xl text-xs font-black uppercase ${activeRoom.badgeBg} ${activeRoom.badgeText} shadow-xs`}>
+                    {activeRoom.name} • {activeRoom.subname}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <UserCheck className="w-3 h-3 text-emerald-600" />
+                    Profissional Cadastrado
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+                    {doctorDisplayName}
+                  </h2>
+
+                  {/* Doctor switcher if multiple doctors registered */}
+                  {allMedicalStaff.length > 1 && (
+                    <div className="relative inline-block">
+                      <select
+                        aria-label="Trocar Profissional"
+                        value={effectiveDoctor?.id || ''}
+                        onChange={(e) => setSelectedDoctorId(e.target.value || null)}
+                        className="text-[11px] font-bold bg-sky-50 text-blue-800 border border-sky-200 rounded-xl px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                        title="Selecione outro profissional cadastrado para atender neste consultório"
+                      >
+                        {allMedicalStaff.map(doc => (
+                          <option key={doc.id} value={doc.id}>
+                            {doc.name} ({doc.specialty || doc.role})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                  {doctorSubtitle}
                 </p>
               </div>
 
@@ -290,7 +376,7 @@ export const DoctorRoomView: React.FC = () => {
                     {currentPatient.status === 'chamado' && (
                       <button
                         id="btn-doctor-start-consultation"
-                        onClick={() => startConsultation(currentPatient.id, activeRoom.defaultDoctor)}
+                        onClick={() => startConsultation(currentPatient.id, doctorDisplayName)}
                         className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-200 cursor-pointer"
                       >
                         <Play className="w-4 h-4 stroke-[2.5]" />
@@ -329,7 +415,7 @@ export const DoctorRoomView: React.FC = () => {
                           <span className="text-[10px] font-black uppercase text-slate-400 px-2 block">
                             Encaminhar paciente para:
                           </span>
-                          {ROOM_LIST.filter(r => r.id !== activeRoomId).map(r => (
+                          {currentRoomList.filter(r => r.id !== activeRoomId).map(r => (
                             <button
                               key={r.id}
                               onClick={() => handleFinishAndSave(r.id)}
@@ -377,7 +463,7 @@ export const DoctorRoomView: React.FC = () => {
                     className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-xl shadow-blue-200 transition-all hover:scale-105 cursor-pointer"
                   >
                     <Volume2 className="w-5 h-5 stroke-[2.5]" />
-                    <span>Chamar Próximo ({waitingPatients[0].name.split(' ')[0]} - {waitingPatients[0].ticketNumber})</span>
+                    <span>Chamar Próximo ({waitingPatients[0].rank ? `${waitingPatients[0].rank} ` : ''}{waitingPatients[0].name} - {waitingPatients[0].ticketNumber})</span>
                   </button>
                 ) : (
                   <span className="text-xs font-bold text-slate-400 px-4 py-2.5 rounded-2xl bg-sky-50 border border-sky-100">

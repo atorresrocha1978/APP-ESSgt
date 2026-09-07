@@ -11,7 +11,10 @@ import {
   RoomCategory,
   User,
   UserRole,
-  MilitaryRank
+  MilitaryRank,
+  MILITARY_RANKS,
+  COMMON_OPMS,
+  DEFAULT_HEALTH_INSURANCES
 } from '../types';
 import { ROOMS } from '../constants/rooms';
 import { INITIAL_PATIENTS, generateSeedRecords } from '../constants/mockData';
@@ -44,8 +47,8 @@ interface ClinicContextType {
   attendanceRecords: AttendanceRecord[];
   activeRoomId: RoomId;
   setActiveRoomId: (id: RoomId) => void;
-  activeTab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios';
-  setActiveTab: (tab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios') => void;
+  activeTab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual';
+  setActiveTab: (tab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual') => void;
   audioSettings: AudioSettings;
   updateAudioSettings: (settings: Partial<AudioSettings>) => void;
   
@@ -84,6 +87,22 @@ interface ClinicContextType {
     roomFilter?: RoomId | 'all'
   ) => ClinicMetrics;
   
+  // Support tables for patient registration: Ranks, OPMs, Health Assistance
+  militaryRanks: string[];
+  addMilitaryRank: (rank: string) => void;
+  updateMilitaryRank: (oldRank: string, newRank: string) => void;
+  deleteMilitaryRank: (rank: string) => void;
+
+  opms: string[];
+  addOpm: (opm: string) => void;
+  updateOpm: (oldOpm: string, newOpm: string) => void;
+  deleteOpm: (opm: string) => void;
+
+  healthInsurances: string[];
+  addHealthInsurance: (insurance: string) => void;
+  updateHealthInsurance: (oldInsurance: string, newInsurance: string) => void;
+  deleteHealthInsurance: (insurance: string) => void;
+
   // System resets
   resetToDefaultData: () => void;
   clearQueue: () => void;
@@ -102,7 +121,10 @@ const STORAGE_KEYS = {
   ACTIVE_ROOM: 'medifila_active_room_v1',
   USERS: 'medifila_users_v1',
   CURRENT_USER: 'medifila_current_user_v1',
-  ROOMS: 'medifila_rooms_v1'
+  ROOMS: 'medifila_rooms_v1',
+  RANKS: 'medifila_ranks_v1',
+  OPMS: 'medifila_opms_v1',
+  INSURANCES: 'medifila_insurances_v1'
 };
 
 const DEFAULT_AUDIO: AudioSettings = {
@@ -198,7 +220,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return saved || 'consultorio_01';
   });
 
-  const [activeTab, setActiveTab] = useState<'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios'>('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual'>('menu');
 
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AUDIO);
@@ -206,6 +228,42 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
     return DEFAULT_AUDIO;
+  });
+
+  // Military ranks with persistence
+  const [militaryRanks, setMilitaryRanks] = useState<string[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.RANKS);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) { console.error(e); }
+    }
+    return MILITARY_RANKS;
+  });
+
+  // OPMs with persistence
+  const [opms, setOpms] = useState<string[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.OPMS);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) { console.error(e); }
+    }
+    return COMMON_OPMS;
+  });
+
+  // Health insurances / assistências à saúde with persistence
+  const [healthInsurances, setHealthInsurances] = useState<string[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.INSURANCES);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) { console.error(e); }
+    }
+    return DEFAULT_HEALTH_INSURANCES;
   });
 
   // Persist state updates
@@ -244,6 +302,18 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.ROOMS, JSON.stringify(rooms));
   }, [rooms]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.RANKS, JSON.stringify(militaryRanks));
+  }, [militaryRanks]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.OPMS, JSON.stringify(opms));
+  }, [opms]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.INSURANCES, JSON.stringify(healthInsurances));
+  }, [healthInsurances]);
 
   // BroadcastChannel for cross-tab multi-screen real-time synchronization
   useEffect(() => {
@@ -469,6 +539,58 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setPatients(prev => prev.filter(p => p.id !== id));
   }, []);
 
+  // Support tables management: Ranks, OPMs, Health Assistance
+  const addMilitaryRank = useCallback((rank: string) => {
+    const trimmed = rank.trim();
+    if (!trimmed) return;
+    setMilitaryRanks(prev => prev.includes(trimmed) ? prev : [...prev, trimmed]);
+  }, []);
+
+  const updateMilitaryRank = useCallback((oldRank: string, newRank: string) => {
+    const trimmed = newRank.trim();
+    if (!trimmed) return;
+    setMilitaryRanks(prev => prev.map(r => (r === oldRank ? trimmed : r)));
+    setPatients(prev => prev.map(p => (p.rank === oldRank ? { ...p, rank: trimmed } : p)));
+  }, []);
+
+  const deleteMilitaryRank = useCallback((rank: string) => {
+    setMilitaryRanks(prev => prev.filter(r => r !== rank));
+  }, []);
+
+  const addOpm = useCallback((opm: string) => {
+    const trimmed = opm.trim();
+    if (!trimmed) return;
+    setOpms(prev => prev.includes(trimmed) ? prev : [...prev, trimmed]);
+  }, []);
+
+  const updateOpm = useCallback((oldOpm: string, newOpm: string) => {
+    const trimmed = newOpm.trim();
+    if (!trimmed) return;
+    setOpms(prev => prev.map(o => (o === oldOpm ? trimmed : o)));
+    setPatients(prev => prev.map(p => (p.opm === oldOpm ? { ...p, opm: trimmed } : p)));
+  }, []);
+
+  const deleteOpm = useCallback((opm: string) => {
+    setOpms(prev => prev.filter(o => o !== opm));
+  }, []);
+
+  const addHealthInsurance = useCallback((insurance: string) => {
+    const trimmed = insurance.trim();
+    if (!trimmed) return;
+    setHealthInsurances(prev => prev.includes(trimmed) ? prev : [...prev, trimmed]);
+  }, []);
+
+  const updateHealthInsurance = useCallback((oldInsurance: string, newInsurance: string) => {
+    const trimmed = newInsurance.trim();
+    if (!trimmed) return;
+    setHealthInsurances(prev => prev.map(i => (i === oldInsurance ? trimmed : i)));
+    setPatients(prev => prev.map(p => (p.insurance === oldInsurance ? { ...p, insurance: trimmed } : p)));
+  }, []);
+
+  const deleteHealthInsurance = useCallback((insurance: string) => {
+    setHealthInsurances(prev => prev.filter(i => i !== insurance));
+  }, []);
+
   // Add new patient in Reception
   const addPatient = (data: {
     rank?: MilitaryRank | string;
@@ -572,7 +694,13 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       category: room.category,
       timestamp: nowIso,
       priority: targetPatient.priority,
-      doctorName: (currentUser && (currentUser.role === 'medico' || currentUser.role === 'dentista' || currentUser.role === 'enfermeiro')) ? currentUser.name : room.defaultDoctor
+      doctorName: (() => {
+        if (currentUser && (currentUser.role === 'medico' || currentUser.role === 'dentista' || currentUser.role === 'enfermeiro') && (currentUser.assignedRoomId === roomId || currentUser.assignedRoomId === 'all')) {
+          return currentUser.name;
+        }
+        const assignedDoc = users.find(u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro') && (u.assignedRoomId === roomId || u.assignedRoomId === 'all'));
+        return assignedDoc ? assignedDoc.name : room.defaultDoctor;
+      })()
     };
 
     // Update patient status in state
@@ -612,7 +740,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         audioSettings.voiceVolume
       );
     }
-  }, [patients, audioSettings, currentUser]);
+  }, [patients, audioSettings, currentUser, users, rooms]);
 
   const recallPatient = async (patientId: string) => {
     const targetPatient = patients.find(p => p.id === patientId);
@@ -624,11 +752,14 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const now = new Date().toISOString();
     setPatients(prev => prev.map(p => {
       if (p.id === patientId) {
+        const room = rooms[p.targetRoomId] || ROOMS[p.targetRoomId];
+        const assignedDoc = users.find(u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro') && (u.assignedRoomId === p.targetRoomId || u.assignedRoomId === 'all'));
+        const fallbackDoctor = assignedDoc ? assignedDoc.name : (room?.defaultDoctor || 'Profissional de Saúde');
         return {
           ...p,
           status: 'em_atendimento',
           startedAt: now,
-          doctorName: doctorName || ROOMS[p.targetRoomId].defaultDoctor
+          doctorName: doctorName || fallbackDoctor
         };
       }
       return p;
@@ -646,7 +777,13 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const waitTime = Math.max(1, Math.round((started.getTime() - registered.getTime()) / 60000));
     const attTime = Math.max(1, Math.round((now.getTime() - started.getTime()) / 60000));
 
-    const room = ROOMS[targetPatient.targetRoomId];
+    const room = rooms[targetPatient.targetRoomId] || ROOMS[targetPatient.targetRoomId] || {
+      name: 'Consultório',
+      category: 'clinico' as const,
+      defaultDoctor: 'Profissional de Saúde'
+    };
+    const assignedDoc = users.find(u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro') && (u.assignedRoomId === targetPatient.targetRoomId || u.assignedRoomId === 'all'));
+    const resolvedDoctor = targetPatient.doctorName || (assignedDoc ? assignedDoc.name : room.defaultDoctor);
 
     // Create completed attendance record for statistics
     const newRecord: AttendanceRecord = {
@@ -663,7 +800,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       roomId: targetPatient.targetRoomId,
       roomName: room.name,
       category: room.category,
-      doctorName: targetPatient.doctorName || room.defaultDoctor,
+      doctorName: resolvedDoctor,
       registeredAt: targetPatient.registeredAt,
       calledAt: targetPatient.calledAt || started.toISOString(),
       startedAt: started.toISOString(),
@@ -683,7 +820,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     // Check if patient is forwarded to another room (e.g. Medicação)
     if (forwardToRoomId && forwardToRoomId !== targetPatient.targetRoomId) {
-      const forwardRoom = ROOMS[forwardToRoomId];
+      const forwardRoom = rooms[forwardToRoomId] || ROOMS[forwardToRoomId];
       const forwardTicket = `${forwardRoom.prefix}-${String(patients.filter(p => p.targetRoomId === forwardToRoomId).length + 1).padStart(3, '0')}`;
       
       const forwardedPatient: Patient = {
@@ -730,6 +867,8 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       category: 'clinico' as const,
       defaultDoctor: 'Profissional'
     };
+    const assignedDoc = users.find(u => u.active && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro') && (u.assignedRoomId === targetPatient.targetRoomId || u.assignedRoomId === 'all'));
+    const resolvedDoctor = targetPatient.doctorName || (assignedDoc ? assignedDoc.name : room.defaultDoctor);
 
     const newRecord: AttendanceRecord = {
       id: `rec-abs-${Date.now()}`,
@@ -745,7 +884,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       roomId: targetPatient.targetRoomId,
       roomName: room.name,
       category: room.category,
-      doctorName: room.defaultDoctor,
+      doctorName: resolvedDoctor,
       registeredAt: targetPatient.registeredAt,
       calledAt: targetPatient.calledAt || now.toISOString(),
       startedAt: now.toISOString(),
@@ -939,10 +1078,16 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setCallHistory([]);
     setCurrentCall(null);
     setRooms(ROOMS);
+    setMilitaryRanks(MILITARY_RANKS);
+    setOpms(COMMON_OPMS);
+    setHealthInsurances(DEFAULT_HEALTH_INSURANCES);
     localStorage.removeItem(STORAGE_KEYS.PATIENTS);
     localStorage.removeItem(STORAGE_KEYS.RECORDS);
     localStorage.removeItem(STORAGE_KEYS.CALL_HISTORY);
     localStorage.removeItem(STORAGE_KEYS.ROOMS);
+    localStorage.removeItem(STORAGE_KEYS.RANKS);
+    localStorage.removeItem(STORAGE_KEYS.OPMS);
+    localStorage.removeItem(STORAGE_KEYS.INSURANCES);
   };
 
   const clearQueue = () => {
@@ -981,6 +1126,18 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setActiveTab,
     audioSettings,
     updateAudioSettings,
+    militaryRanks,
+    addMilitaryRank,
+    updateMilitaryRank,
+    deleteMilitaryRank,
+    opms,
+    addOpm,
+    updateOpm,
+    deleteOpm,
+    healthInsurances,
+    addHealthInsurance,
+    updateHealthInsurance,
+    deleteHealthInsurance,
     addPatient,
     updatePatient,
     deletePatient,
@@ -1021,6 +1178,18 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     activeRoomId,
     activeTab,
     audioSettings,
+    militaryRanks,
+    addMilitaryRank,
+    updateMilitaryRank,
+    deleteMilitaryRank,
+    opms,
+    addOpm,
+    updateOpm,
+    deleteOpm,
+    healthInsurances,
+    addHealthInsurance,
+    updateHealthInsurance,
+    deleteHealthInsurance,
     addPatient,
     updatePatient,
     deletePatient,

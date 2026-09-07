@@ -45,6 +45,19 @@
     background: #ffffff !important;
   }
 
+  .a4-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 280mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 8mm !important;
+    transform: none !important;
+  }
+
   .print-page-break-inside-avoid {
     break-inside: avoid !important;
     page-break-inside: avoid !important;

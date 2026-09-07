@@ -51,8 +51,22 @@ export const ReceptionView: React.FC = () => {
     callPatient, 
     cancelPatient, 
     transferPatient, 
-    currentCall
+    currentCall,
+    rooms,
+    roomList,
+    users,
+    militaryRanks,
+    opms,
+    healthInsurances
   } = useClinic();
+
+  const effectiveRoomList = (roomList && roomList.length > 0) ? roomList : ROOM_LIST;
+  const availableRanks = (militaryRanks && militaryRanks.length > 0) ? militaryRanks : MILITARY_RANKS;
+  const availableOpms = (opms && opms.length > 0) ? opms : COMMON_OPMS;
+  const availableInsurances = (healthInsurances && healthInsurances.length > 0) 
+    ? healthInsurances 
+    : ['CMed / CBPM', 'Cruz Azul de SP', 'SUS', 'Particular'];
+  const effectiveRooms = rooms || ROOMS;
 
   // Registration Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -227,9 +241,11 @@ export const ReceptionView: React.FC = () => {
 
       {/* Real-time Room Status Overview Cards (5 Rooms) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-        {ROOM_LIST.map((room) => {
+        {effectiveRoomList.map((room) => {
           const roomQueue = patients.filter(p => p.targetRoomId === room.id && p.status === 'aguardando');
           const currentPatient = patients.find(p => p.targetRoomId === room.id && (p.status === 'em_atendimento' || p.status === 'chamado'));
+          const assignedDoc = users.find(u => u.active && u.assignedRoomId === room.id && (u.role === 'medico' || u.role === 'dentista' || u.role === 'enfermeiro'));
+          const docName = assignedDoc ? assignedDoc.name : (room.defaultDoctor || 'Plantão');
 
           return (
             <div
@@ -252,6 +268,7 @@ export const ReceptionView: React.FC = () => {
 
               <h3 className="font-black text-sm text-slate-800 line-clamp-1">{room.name}</h3>
               <p className="text-[11px] font-semibold text-slate-400 line-clamp-1">{room.subname}</p>
+              <p className="text-[11px] font-bold text-blue-700 line-clamp-1 mt-0.5">{docName}</p>
 
               <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px]">
                 {currentPatient ? (
@@ -307,8 +324,8 @@ export const ReceptionView: React.FC = () => {
               onChange={(e) => setRoomFilter(e.target.value as RoomId | 'all')}
               className="text-xs font-bold bg-sky-50/60 border border-sky-100 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">Todas as Salas (5)</option>
-              {ROOM_LIST.map(r => (
+              <option value="all">Todas as Salas ({effectiveRoomList.length})</option>
+              {effectiveRoomList.map(r => (
                 <option key={r.id} value={r.id}>{r.name} - {r.subname}</option>
               ))}
             </select>
@@ -361,7 +378,7 @@ export const ReceptionView: React.FC = () => {
             <tbody className="divide-y divide-slate-100">
               {filteredPatients.length > 0 ? (
                 filteredPatients.map((patient) => {
-                  const room = ROOMS[patient.targetRoomId];
+                  const room = effectiveRooms[patient.targetRoomId] || ROOMS[patient.targetRoomId];
                   return (
                     <tr 
                       key={patient.id} 
@@ -544,7 +561,7 @@ export const ReceptionView: React.FC = () => {
                     onChange={(e) => setRank(e.target.value as MilitaryRank)}
                     className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800"
                   >
-                    {MILITARY_RANKS.map((r) => (
+                    {availableRanks.map((r) => (
                       <option key={r} value={r}>
                         {r}
                       </option>
@@ -629,7 +646,7 @@ export const ReceptionView: React.FC = () => {
                     onChange={(e) => setOpm(e.target.value)}
                     className="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-700"
                   >
-                    {COMMON_OPMS.map((o) => (
+                    {availableOpms.map((o) => (
                       <option key={o} value={o}>
                         {o}
                       </option>
@@ -701,12 +718,13 @@ export const ReceptionView: React.FC = () => {
                     id="modal-select-insurance"
                     value={insurance}
                     onChange={(e) => setInsurance(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                   >
-                    <option value="CMed / CBPM">CMed / CBPM (Polícia Militar)</option>
-                    <option value="Cruz Azul de SP">Cruz Azul de SP</option>
-                    <option value="SUS">SUS</option>
-                    <option value="Particular">Particular</option>
+                    {availableInsurances.map((ins) => (
+                      <option key={ins} value={ins}>
+                        {ins}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -787,7 +805,7 @@ export const ReceptionView: React.FC = () => {
                 <strong>RE:</strong> {createdTicket.re || createdTicket.document} • <strong>OPM:</strong> {createdTicket.opm || 'ESSgt'}
               </p>
               <p>
-                <strong>Destino:</strong> {ROOMS[createdTicket.targetRoomId]?.name} ({ROOMS[createdTicket.targetRoomId]?.subname})
+                <strong>Destino:</strong> {effectiveRooms[createdTicket.targetRoomId]?.name || ROOMS[createdTicket.targetRoomId]?.name} ({effectiveRooms[createdTicket.targetRoomId]?.subname || ROOMS[createdTicket.targetRoomId]?.subname})
               </p>
               <p>
                 <strong>Prioridade:</strong> <span className="capitalize font-bold">{createdTicket.priority}</span>
@@ -829,7 +847,7 @@ export const ReceptionView: React.FC = () => {
               onChange={(e) => setSelectedNewRoom(e.target.value as RoomId)}
               className="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl mb-4 font-semibold"
             >
-              {ROOM_LIST.map(r => (
+              {effectiveRoomList.map(r => (
                 <option key={r.id} value={r.id}>{r.name} - {r.subname}</option>
               ))}
             </select>

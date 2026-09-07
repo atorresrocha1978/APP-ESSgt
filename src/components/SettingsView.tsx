@@ -13,10 +13,13 @@ import {
   Syringe, 
   Smile,
   Sliders,
-  Check
+  Check,
+  BookOpen,
+  Download
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { ROOM_LIST } from '../constants/rooms';
+import { generatePdfManual } from '../utils/generatePdfManual';
 
 export const SettingsView: React.FC = () => {
   const { 
@@ -25,7 +28,8 @@ export const SettingsView: React.FC = () => {
     testRoomSound, 
     resetToDefaultData, 
     clearQueue,
-    clearReports
+    clearReports,
+    setActiveTab
   } = useClinic();
 
   return (
@@ -161,6 +165,60 @@ export const SettingsView: React.FC = () => {
           </label>
         </div>
 
+      </div>
+
+      {/* Official Manual & Documentation Card */}
+      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-sky-100 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-sky-100 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center font-bold">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="font-black text-base text-slate-800">
+                Manual de Operação do Usuário (PDF / A4)
+              </h2>
+              <p className="text-xs text-slate-400 font-medium">
+                Documentação oficial com diretrizes operacionais, triagem militar e fluxos do sistema.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('manual')}
+              id="btn-settings-view-manual"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4 text-red-600" />
+              <span>Visualizar na Tela</span>
+            </button>
+
+            <button
+              onClick={generatePdfManual}
+              id="btn-settings-download-manual-pdf"
+              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-md shadow-red-100"
+            >
+              <Download className="w-4 h-4" />
+              <span>Baixar PDF (A4)</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-600">
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <strong className="text-slate-800 block mb-0.5">Formato A4 Padrão:</strong>
+            <span>Diagramação de 6 páginas com capa institucional, sumário e cabeçalhos oficiais.</span>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <strong className="text-slate-800 block mb-0.5">Procedimentos Detalhados:</strong>
+            <span>Instruções completas para Médicos, Dentistas, Enfermagem e Recepção.</span>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <strong className="text-slate-800 block mb-0.5">Segurança & Suporte:</strong>
+            <span>Credenciais do administrador, desbloqueio de áudio na TV e FAQ rápido.</span>
+          </div>
+        </div>
       </div>
 
       {/* Data Management Card */}

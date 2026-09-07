@@ -14,7 +14,8 @@ import {
   ShieldCheck, 
   User as UserIcon,
   ChevronDown,
-  LayoutGrid
+  LayoutGrid,
+  BookOpen
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { ROOMS } from '../constants/rooms';
@@ -170,6 +171,20 @@ export const Navbar: React.FC = () => {
             >
               <BarChart3 className={`w-3.5 h-3.5 ${activeTab === 'gestao' ? 'text-white' : 'text-slate-600'}`} />
               <span>Relatórios</span>
+            </button>
+
+            <button
+              id="nav-tab-manual"
+              onClick={() => setActiveTab('manual')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'manual'
+                  ? 'bg-red-600 text-white shadow-md shadow-red-200'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              }`}
+              title="Manual de Operação em PDF (A4 Oficial)"
+            >
+              <BookOpen className={`w-3.5 h-3.5 ${activeTab === 'manual' ? 'text-white' : 'text-red-600'}`} />
+              <span>Manual A4</span>
             </button>
 
             <button
