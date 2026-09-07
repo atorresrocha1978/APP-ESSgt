@@ -47,6 +47,7 @@ export const AdminUsersView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   // Form states
   const [formData, setFormData] = useState<{
@@ -546,12 +547,7 @@ export const AdminUsersView: React.FC = () => {
                           {/* Delete User */}
                           {user.username !== 'admin' && (
                             <button
-                              onClick={() => {
-                                if (confirm(`Tem certeza que deseja excluir o usuário "${user.name}"?`)) {
-                                  deleteUser(user.id);
-                                  showToast(`Usuário "${user.name}" removido.`);
-                                }
-                              }}
+                              onClick={() => setUserToDelete(user)}
                               className="p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-200 transition-colors cursor-pointer"
                               title="Excluir Usuário"
                             >
@@ -865,6 +861,51 @@ export const AdminUsersView: React.FC = () => {
 
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Delete User */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+              <Trash2 className="w-6 h-6 stroke-[2.5]" />
+            </div>
+
+            <h3 className="text-lg font-black text-slate-900">
+              Confirmar Exclusão de Usuário
+            </h3>
+
+            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+              Você tem certeza que deseja excluir o usuário <strong className="text-slate-900">{userToDelete.name}</strong> (@{userToDelete.username})?
+            </p>
+
+            <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium">
+              Esta ação revogará o acesso deste usuário ao sistema imediatamente.
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setUserToDelete(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteUser(userToDelete.id);
+                  setSuccessToast(`Usuário "${userToDelete.name}" removido com sucesso.`);
+                  setUserToDelete(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-md shadow-rose-200 transition-all flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Sim, Excluir Usuário
+              </button>
+            </div>
           </div>
         </div>
       )}

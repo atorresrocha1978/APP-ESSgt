@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Settings, 
   Volume2, 
@@ -15,7 +15,10 @@ import {
   Sliders,
   Check,
   BookOpen,
-  Download
+  Download,
+  FileText,
+  AlertTriangle,
+  X
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { ROOM_LIST } from '../constants/rooms';
@@ -31,6 +34,14 @@ export const SettingsView: React.FC = () => {
     clearReports,
     setActiveTab
   } = useClinic();
+
+  const [confirmAction, setConfirmAction] = useState<'clearReports' | 'clearQueue' | 'resetDemo' | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -168,8 +179,48 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* Official Manual & Documentation Card */}
-      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-sky-100 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-sky-100 pb-4">
+      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-sky-100 shadow-sm space-y-6">
+        
+        {/* Technical Documentation Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-sky-100 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="font-black text-base text-slate-800">
+                Documentação Técnica do Sistema (v2.5)
+              </h2>
+              <p className="text-xs text-slate-400 font-medium">
+                Especificação de arquitetura, models TypeScript, RBAC, fluxos e áudio da UIS.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('documentacao')}
+              id="btn-settings-view-docs"
+              className="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-blue-200"
+            >
+              <FileText className="w-4 h-4 text-blue-600" />
+              <span>Ver Documentação</span>
+            </button>
+
+            <a
+              href="/DOCUMENTACAO_SISTEMA.md"
+              download="DOCUMENTACAO_SISTEMA_UIS_ESSgt.md"
+              id="btn-settings-download-docs-md"
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+            >
+              <Download className="w-4 h-4" />
+              <span>Baixar .md</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Operational Manual Row */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-sky-100 pb-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center font-bold">
               <BookOpen className="w-5 h-5" />
@@ -179,7 +230,7 @@ export const SettingsView: React.FC = () => {
                 Manual de Operação do Usuário (PDF / A4)
               </h2>
               <p className="text-xs text-slate-400 font-medium">
-                Documentação oficial com diretrizes operacionais, triagem militar e fluxos do sistema.
+                Documentação operacional oficial com diretrizes de triagem militar e procedimentos padrão (POP).
               </p>
             </div>
           </div>
@@ -215,8 +266,8 @@ export const SettingsView: React.FC = () => {
             <span>Instruções completas para Médicos, Dentistas, Enfermagem e Recepção.</span>
           </div>
           <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-            <strong className="text-slate-800 block mb-0.5">Segurança & Suporte:</strong>
-            <span>Credenciais do administrador, desbloqueio de áudio na TV e FAQ rápido.</span>
+            <strong className="text-slate-800 block mb-0.5">Documentação Completa:</strong>
+            <span>Arquivo markdown completo com diagrama de módulos e contratos de API.</span>
           </div>
         </div>
       </div>
@@ -234,12 +285,7 @@ export const SettingsView: React.FC = () => {
         <div className="flex flex-wrap gap-3 pt-2">
           <button
             id="btn-clear-reports-settings"
-            onClick={() => {
-              if (window.confirm('Atenção: Deseja realmente zerar todo o histórico de relatórios e atendimentos anteriores? As estatísticas serão redefinidas para zero.')) {
-                clearReports();
-                alert('Relatórios zerados com sucesso!');
-              }
-            }}
+            onClick={() => setConfirmAction('clearReports')}
             className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white border border-rose-200 transition-colors cursor-pointer shadow-xs"
           >
             <Trash2 className="w-4 h-4 stroke-[2.5]" />
@@ -248,11 +294,7 @@ export const SettingsView: React.FC = () => {
 
           <button
             id="btn-clear-queue-only"
-            onClick={() => {
-              if (window.confirm('Deseja limpar todos os pacientes em espera na fila agora?')) {
-                clearQueue();
-              }
-            }}
+            onClick={() => setConfirmAction('clearQueue')}
             className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black bg-amber-50 text-amber-800 hover:bg-amber-600 hover:text-white border border-amber-200 transition-colors cursor-pointer shadow-xs"
           >
             <Trash2 className="w-4 h-4 stroke-[2.5]" />
@@ -261,11 +303,7 @@ export const SettingsView: React.FC = () => {
 
           <button
             id="btn-reset-demo-data"
-            onClick={() => {
-              if (window.confirm('Deseja recarregar os dados de demonstração com histórico completo de 30 dias?')) {
-                resetToDefaultData();
-              }
-            }}
+            onClick={() => setConfirmAction('resetDemo')}
             className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black bg-sky-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-sky-200 transition-colors cursor-pointer shadow-xs"
           >
             <RotateCcw className="w-4 h-4 stroke-[2.5]" />
@@ -273,6 +311,75 @@ export const SettingsView: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Toast */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl border border-slate-700 text-xs font-bold flex items-center gap-2 animate-in slide-in-from-bottom-5">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+              {confirmAction === 'resetDemo' ? (
+                <RotateCcw className="w-6 h-6 stroke-[2.5]" />
+              ) : (
+                <Trash2 className="w-6 h-6 stroke-[2.5]" />
+              )}
+            </div>
+
+            <h3 className="text-lg font-black text-slate-900">
+              {confirmAction === 'clearReports' && 'Zerar Histórico & Relatórios'}
+              {confirmAction === 'clearQueue' && 'Zerar Fila de Espera'}
+              {confirmAction === 'resetDemo' && 'Recarregar Dados de Demonstração'}
+            </h3>
+
+            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+              {confirmAction === 'clearReports' && 'Atenção: Deseja realmente zerar todo o histórico de relatórios e atendimentos finalizados? As estatísticas serão redefinidas para zero.'}
+              {confirmAction === 'clearQueue' && 'Deseja limpar todos os pacientes que estão aguardando atendimento na fila agora?'}
+              {confirmAction === 'resetDemo' && 'Deseja recarregar o banco de dados com a carga de demonstração de 30 dias (120 atendimentos e fila de exemplo)?'}
+            </p>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmAction(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmAction === 'clearReports') {
+                    clearReports();
+                    showToast('Histórico e relatórios zerados com sucesso!');
+                  } else if (confirmAction === 'clearQueue') {
+                    clearQueue();
+                    showToast('Fila de espera zerada com sucesso!');
+                  } else if (confirmAction === 'resetDemo') {
+                    resetToDefaultData();
+                    showToast('Dados de demonstração recarregados com sucesso!');
+                  }
+                  setConfirmAction(null);
+                }}
+                className={`px-5 py-2.5 rounded-xl font-bold text-xs cursor-pointer text-white shadow-md transition-all flex items-center gap-1.5 ${
+                  confirmAction === 'resetDemo'
+                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+                    : 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
+                }`}
+              >
+                <Check className="w-3.5 h-3.5" />
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

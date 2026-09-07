@@ -47,8 +47,8 @@ interface ClinicContextType {
   attendanceRecords: AttendanceRecord[];
   activeRoomId: RoomId;
   setActiveRoomId: (id: RoomId) => void;
-  activeTab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual';
-  setActiveTab: (tab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual') => void;
+  activeTab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual' | 'documentacao';
+  setActiveTab: (tab: 'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual' | 'documentacao') => void;
   audioSettings: AudioSettings;
   updateAudioSettings: (settings: Partial<AudioSettings>) => void;
   
@@ -220,7 +220,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return saved || 'consultorio_01';
   });
 
-  const [activeTab, setActiveTab] = useState<'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual'>('menu');
+  const [activeTab, setActiveTab] = useState<'menu' | 'tv' | 'recepcao' | 'consultorios' | 'admin' | 'gestao' | 'configuracoes' | 'usuarios' | 'manual' | 'documentacao'>('menu');
 
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.AUDIO);

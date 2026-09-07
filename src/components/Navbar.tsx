@@ -15,7 +15,8 @@ import {
   User as UserIcon,
   ChevronDown,
   LayoutGrid,
-  BookOpen
+  BookOpen,
+  FileText
 } from 'lucide-react';
 import { useClinic } from '../context/ClinicContext';
 import { ROOMS } from '../constants/rooms';
@@ -185,6 +186,20 @@ export const Navbar: React.FC = () => {
             >
               <BookOpen className={`w-3.5 h-3.5 ${activeTab === 'manual' ? 'text-white' : 'text-red-600'}`} />
               <span>Manual A4</span>
+            </button>
+
+            <button
+              id="nav-tab-docs"
+              onClick={() => setActiveTab('documentacao')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeTab === 'documentacao'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+              }`}
+              title="Documentação Técnica e Funcional do Sistema"
+            >
+              <FileText className={`w-3.5 h-3.5 ${activeTab === 'documentacao' ? 'text-white' : 'text-blue-600'}`} />
+              <span>Documentação</span>
             </button>
 
             <button

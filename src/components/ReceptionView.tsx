@@ -50,6 +50,7 @@ export const ReceptionView: React.FC = () => {
     addPatient, 
     callPatient, 
     cancelPatient, 
+    deletePatient,
     transferPatient, 
     currentCall,
     rooms,
@@ -59,6 +60,8 @@ export const ReceptionView: React.FC = () => {
     opms,
     healthInsurances
   } = useClinic();
+
+  const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
 
   const effectiveRoomList = (roomList && roomList.length > 0) ? roomList : ROOM_LIST;
   const availableRanks = (militaryRanks && militaryRanks.length > 0) ? militaryRanks : MILITARY_RANKS;
@@ -496,9 +499,9 @@ export const ReceptionView: React.FC = () => {
                           {/* Cancel / Delete */}
                           <button
                             id={`btn-reception-delete-${patient.id}`}
-                            onClick={() => cancelPatient(patient.id)}
-                            className="p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-colors"
-                            title="Remover da Fila"
+                            onClick={() => setPatientToDelete(patient)}
+                            className="p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer"
+                            title="Excluir ou Cancelar Paciente"
                           >
                             <Trash2 className="w-4 h-4 stroke-[2.5]" />
                           </button>
@@ -867,6 +870,85 @@ export const ReceptionView: React.FC = () => {
                 className="px-4 py-2 text-xs font-bold bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-xs"
               >
                 Confirmar Transferência
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal: Delete / Cancel Patient from Queue */}
+      {patientToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                  <Trash2 className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">
+                    Remover ou Cancelar Paciente
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Senha: <strong className="font-mono text-blue-700">{patientToDelete.ticketNumber}</strong>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPatientToDelete(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-3">
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-1">
+                <p className="font-bold text-slate-800 text-sm">{patientToDelete.name}</p>
+                <p className="text-slate-500">
+                  RE: <span className="font-mono font-bold text-slate-700">{patientToDelete.re}</span> | Posto: <span className="font-bold text-slate-700">{patientToDelete.rank}</span> | OPM: <span className="font-bold text-slate-700">{patientToDelete.opm}</span>
+                </p>
+                <p className="text-slate-500">
+                  Destino: <span className="font-bold text-blue-700">{effectiveRoomList.find(r => r.id === patientToDelete.targetRoomId)?.name || patientToDelete.targetRoomId}</span>
+                </p>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Escolha o tipo de remoção desejada para este paciente:
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  deletePatient(patientToDelete.id);
+                  setPatientToDelete(null);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-rose-200 transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                Excluir Definitivamente do Sistema
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  cancelPatient(patientToDelete.id);
+                  setPatientToDelete(null);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-amber-200 transition-all"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                Marcar como Cancelado (Manter Histórico)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setPatientToDelete(null)}
+                className="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer transition-colors text-center mt-1"
+              >
+                Voltar / Fechar
               </button>
             </div>
           </div>

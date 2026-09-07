@@ -209,10 +209,10 @@ export function generatePdfManual(): void {
 
     const modules = [
       ['Página 2:', 'Acesso, Segurança, Credenciais de Administrador e Perfis Operacionais'],
-      ['Página 3:', 'Módulo de Recepção & Triagem (Cadastro Militar/Civil e Emissão de Senhas)'],
+      ['Página 3:', 'Módulo de Recepção & Triagem (Postos, OPMs, Convênios e Cancelar vs Excluir)'],
       ['Página 4:', 'Painel TV da Sala de Espera (Sintetizador de Voz TTS e Áudio Harmônico)'],
       ['Página 5:', 'Módulo dos Consultórios (Chamada, Prontuário, Medicação e Conclusão)'],
-      ['Página 6:', 'Administração Geral, Gestão de Usuários, Relatórios Estatísticos e FAQ']
+      ['Página 6:', 'Painel Admin (4 Módulos & Apoio), Relatórios Gerenciais e Ações de Sistema']
     ];
 
     let my = cardY + 21;
@@ -357,99 +357,120 @@ export function generatePdfManual(): void {
     drawPageHeader(3, 'Recepção, Triagem & Emissão de Senhas', 'Módulo 2');
     drawPageFooter(3);
 
-    let y = 36;
-    y = drawSectionTitle(y, '2.1', 'Fluxo de Acolhimento e Cadastro de Pacientes');
+    let y = 35;
+    y = drawSectionTitle(y, '2.1', 'Fluxo de Acolhimento, Tabelas de Apoio e Cadastro');
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(51, 65, 85);
-    const p1 = 'A recepção da UIS é responsável por receber os policiais militares (ativos e inativos), alunos da Escola e seus dependentes civis, realizando a triagem prioritária e encaminhando-os para o consultório adequado.';
+    const p1 = 'A recepção acolhe policiais militares e dependentes civis, integrando listas dinâmicas de Postos/Graduações, OPMs de lotação e Convênios/Assistência à Saúde configuradas pela UIS.';
     doc.text(doc.splitTextToSize(p1, contentWidth), margin, y);
-    y += 12;
+    y += 10;
 
-    // Steps list
+    // Steps list (5 steps streamlined)
     const steps = [
-      ['Passo 1: Identificação da Categoria', 'Selecione se o paciente é Militar Estadual ou Dependente Civil. Para militares, selecione o Posto ou Graduação (ex: Cel PM, Cap PM, 1º Sgt PM, Sd PM, Aluno Sgt PM).'],
-      ['Passo 2: Registro Estatístico (RE) e OPM', 'Insira o RE no padrão militar (ex: 123456-7). Digite ou selecione a OPM de lotação (ex: ESSgt, 1º BPM/M, APMBB, CPI-1).'],
-      ['Passo 3: Dados Pessoais do Paciente', 'Preencha o Nome Completo, Idade e Sexo. Caso seja dependente civil, informe o RE do titular para vínculo institucional.'],
-      ['Passo 4: Classificação de Prioridade', 'Selecione rigorosamente a prioridade do atendimento (Normal, Preferencial ou Urgência Clínica).'],
-      ['Passo 5: Seleção do Consultório de Destino', 'Indique o consultório inicial (Clínico Geral, Odontologia 1, Cardiologia, Sala de Medicação, etc.).'],
-      ['Passo 6: Confirmação e Emissão da Senha', 'Clique em "Emitir Senha". O sistema gera a senha sequencial correspondente (ex: CLI-001, ODO-002) e disponibiliza o comprovante impresso.']
+      ['Passo 1: Identificação & Posto/Graduação', 'Defina se é Militar ou Dependente. Para militares, selecione o Posto/Graduação (ex: Cel PM, Cap PM, 1º Sgt PM, Sd PM, Aluno Sgt PM) provido pelas tabelas de apoio.'],
+      ['Passo 2: RE Militar, OPM & Assistência Médica', 'Informe o RE (ex: 123456-7), selecione a OPM de lotação (ESSgt, 1º BPM/M, etc.) e o Convênio (Cruz Azul, CBPM, IAMSPE, Particular).'],
+      ['Passo 3: Dados Pessoais & Queixa Inicial', 'Preencha Nome Completo, Idade, Sexo e descreva a queixa clínica para orientar o médico no consultório.'],
+      ['Passo 4: Classificação de Prioridade Legal', 'Defina rigorosamente a prioridade (Normal, Preferencial ou Urgência Clínica), conforme normativas da PMESP.'],
+      ['Passo 5: Consultório & Emissão de Senha', 'Selecione o consultório inicial e emita a senha sequencial correspondente (ex: CLI-012), com opção de impressão do ticket.']
     ];
 
     steps.forEach(([stTitle, stDesc]) => {
       doc.setFillColor(239, 246, 255);
-      doc.roundedRect(margin, y, contentWidth, 12, 1, 1, 'F');
+      doc.roundedRect(margin, y, contentWidth, 10.5, 1, 1, 'F');
       doc.setDrawColor(191, 219, 254);
       doc.setLineWidth(0.3);
-      doc.roundedRect(margin, y, contentWidth, 12, 1, 1, 'S');
+      doc.roundedRect(margin, y, contentWidth, 10.5, 1, 1, 'S');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
+      doc.setFontSize(7.8);
       doc.setTextColor(30, 58, 138);
-      doc.text(stTitle, margin + 4, y + 4.5);
+      doc.text(stTitle, margin + 3, y + 4.2);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
+      doc.setFontSize(7.2);
       doc.setTextColor(71, 85, 105);
-      const lines = doc.splitTextToSize(stDesc, contentWidth - 8);
-      doc.text(lines, margin + 4, y + 8.5);
+      const lines = doc.splitTextToSize(stDesc, contentWidth - 6);
+      doc.text(lines, margin + 3, y + 8);
 
-      y += 14.5;
+      y += 12.5;
     });
 
-    y += 2;
+    y += 1;
     y = drawSectionTitle(y, '2.2', 'Critérios Oficiais de Prioridade de Atendimento');
 
     // Priority Table
     const prioCols = [margin, margin + 35, margin + 85, margin + 140];
     doc.setFillColor(241, 245, 249);
-    doc.rect(margin, y, contentWidth, 6.5, 'F');
+    doc.rect(margin, y, contentWidth, 6, 'F');
     doc.setDrawColor(203, 213, 225);
     doc.setLineWidth(0.3);
-    doc.rect(margin, y, contentWidth, 6.5, 'S');
+    doc.rect(margin, y, contentWidth, 6, 'S');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
+    doc.setFontSize(7.2);
     doc.setTextColor(15, 23, 42);
-    doc.text('PRIORIDADE', prioCols[0] + 2, y + 4.5);
-    doc.text('PÚBLICO-ALVO / CRITÉRIO', prioCols[1] + 2, y + 4.5);
-    doc.text('ORDENAÇÃO NA FILA', prioCols[2] + 2, y + 4.5);
-    doc.text('COR / SINALIZADOR', prioCols[3] + 2, y + 4.5);
-    y += 6.5;
+    doc.text('PRIORIDADE', prioCols[0] + 2, y + 4.2);
+    doc.text('PÚBLICO-ALVO / CRITÉRIO', prioCols[1] + 2, y + 4.2);
+    doc.text('ORDENAÇÃO NA FILA', prioCols[2] + 2, y + 4.2);
+    doc.text('COR / SINALIZADOR', prioCols[3] + 2, y + 4.2);
+    y += 6;
 
     const prioData = [
       ['NORMAL', 'Consultas de rotina, exames periódicos e avaliações comuns.', 'Ordem cronológica de chegada à UIS.', 'Azul (Padrão)'],
-      ['PREFERENCIAL', 'Idosos (≥60 anos), gestantes, lactantes, pessoas com deficiência (Lei 10.048).', 'Prioridade à frente da fila normal.', 'Âmbar / Amarelo'],
+      ['PREFERENCIAL', 'Idosos (≥60 anos), gestantes, lactantes, pessoas com deficiência (Lei 10.048).', 'Prioridade intercalada à frente da normal.', 'Âmbar / Amarelo'],
       ['URGÊNCIA', 'Sintomas agudos, crises hipertensivas, traumas físicos imediatos.', 'Prioridade MÁXIMA (Passa ao topo da fila).', 'Vermelho (Destaque)']
     ];
 
     prioData.forEach(([p, crit, ord, col]) => {
       doc.setFillColor(255, 255, 255);
-      doc.rect(margin, y, contentWidth, 7, 'F');
+      doc.rect(margin, y, contentWidth, 6.2, 'F');
       doc.setDrawColor(226, 232, 240);
-      doc.rect(margin, y, contentWidth, 7, 'S');
+      doc.rect(margin, y, contentWidth, 6.2, 'S');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
+      doc.setFontSize(7.2);
       doc.setTextColor(p === 'URGÊNCIA' ? 185 : p === 'PREFERENCIAL' ? 180 : 30, p === 'PREFERENCIAL' ? 100 : 28, p === 'NORMAL' ? 138 : 28);
-      doc.text(p, prioCols[0] + 2, y + 4.8);
+      doc.text(p, prioCols[0] + 2, y + 4.2);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
+      doc.setFontSize(6.8);
       doc.setTextColor(51, 65, 85);
-      doc.text(crit, prioCols[1] + 2, y + 4.8);
-      doc.text(ord, prioCols[2] + 2, y + 4.8);
-      doc.text(col, prioCols[3] + 2, y + 4.8);
+      doc.text(crit, prioCols[1] + 2, y + 4.2);
+      doc.text(ord, prioCols[2] + 2, y + 4.2);
+      doc.text(col, prioCols[3] + 2, y + 4.2);
 
-      y += 7;
+      y += 6.2;
     });
 
-    y += 5;
+    y += 2;
+    y = drawSectionTitle(y, '2.3', 'Gestão Segura da Fila: Cancelar vs. Excluir Paciente');
+
+    const queueActions = [
+      ['Marcar como Cancelado (Desistência):', 'Retira o paciente da espera ativa, mas preserva o histórico para auditoria clínica e estatísticas da UIS (ex: paciente precisou ausentar-se).'],
+      ['Excluir Definitivamente:', 'Remove o registro permanentemente do banco de dados da UIS. Exclusivo para correções de erro de digitação ou cadastro duplicado acidental.']
+    ];
+
+    queueActions.forEach(([title, desc]) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(180, 83, 9); // amber-700
+      doc.text(`• ${title}`, margin + 2, y);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.2);
+      doc.setTextColor(71, 85, 105);
+      const lines = doc.splitTextToSize(desc, contentWidth - 6);
+      doc.text(lines, margin + 4, y + 3.8);
+      y += 4.2 + lines.length * 3.2;
+    });
+
+    y += 1.5;
     drawCallout(
       y,
-      'IMPRESSÃO DO COMPROVANTE DE SENHA:',
-      'Ao concluir a emissão da senha, o operador pode clicar em "Imprimir Comprovante". O ticket contém: Número da Senha, Posto/Graduação, Nome, RE, Consultório Destino, Data/Hora e QR Code de identificação para o paciente.',
+      'MODAIS DE SEGURANÇA & COMPROVANTE IMPRESSO:',
+      'Todas as exclusões na recepção exigem confirmação em modal visual detalhado com nome, RE e posto. O ticket de senha pode ser reimpresso a qualquer momento.',
       'success'
     );
   }
@@ -628,98 +649,97 @@ export function generatePdfManual(): void {
   // =========================================================================
   doc.addPage();
   {
-    drawPageHeader(6, 'Administração, Relatórios Gerenciais & FAQ', 'Módulo 5');
+    drawPageHeader(6, 'Administração Geral, Relatórios & FAQ', 'Módulo 5');
     drawPageFooter(6);
 
-    let y = 36;
-    y = drawSectionTitle(y, '5.1', 'Painel do Administrador');
+    let y = 35;
+    y = drawSectionTitle(y, '5.1', 'Os 4 Módulos Centrais do Painel Administrador');
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(51, 65, 85);
-    const p1 = 'Disponível exclusivamente para a coordenação da UIS através do usuário admin. Possui três pilares de gerenciamento:';
+    const p1 = 'Disponível exclusivamente para a coordenação da UIS através de login administrativo. Estruturado em 4 pilares:';
     doc.text(p1, margin, y);
-    y += 8;
+    y += 7;
 
     const adminPillars = [
-      ['1. Gestão de Consultórios:', 'Criar novas salas, renomear consultórios existentes, alterar prefixo de senhas, definir médico titular e atribuir temas de cores.'],
-      ['2. Gestão de Usuários:', 'Cadastrar médicos, dentistas, enfermeiros e recepcionistas. Definir conselhos de classe (CRM, CRO, COREN), senhas e status ativo/inativo.'],
-      ['3. Base Geral de Pacientes:', 'Visualizar e gerenciar o cadastro centralizado de militares e dependentes atendidos na UIS, com filtros por RE, Nome e OPM.']
+      ['1. Consultórios & Salas:', 'Cadastrar novas salas, personalizar siglas (CLI, ODO, ESP, MED), cores e médicos padrão. Possui trava que impede a exclusão do último consultório ativo.'],
+      ['2. Usuários & Profissionais:', 'Cadastrar médicos, dentistas, enfermagem e recepcionistas. Gestão de conselhos (CRM/CRO/COREN), redefinição de senhas e exclusão protegida por confirmação.'],
+      ['3. Base Geral de Pacientes:', 'Consulta de militares e dependentes civis, histórico de atendimentos, busca rápida por RE/Nome/OPM e exclusão com modal visual seguro.'],
+      ['4. Postos, OPMs & Convênios:', 'Gestão dinâmica das tabelas de apoio da recepção: adição e exclusão segura de graduações PMESP, unidades OPM e operadoras de convênio médico.']
     ];
 
     adminPillars.forEach(([title, desc]) => {
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
+      doc.setFontSize(7.8);
       doc.setTextColor(109, 40, 217); // purple-700
       doc.text(title, margin + 2, y);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.8);
+      doc.setFontSize(7.2);
       doc.setTextColor(71, 85, 105);
       const lines = doc.splitTextToSize(desc, contentWidth - 6);
-      doc.text(lines, margin + 4, y + 4.2);
-      y += 5 + lines.length * 3.8;
+      doc.text(lines, margin + 4, y + 3.8);
+      y += 4.5 + lines.length * 3.4;
     });
 
-    y += 4;
-    y = drawSectionTitle(y, '5.2', 'Relatórios Gerenciais e Indicadores de Atendimento');
+    y += 2;
+    y = drawSectionTitle(y, '5.2', 'Relatórios Gerenciais, Indicadores e Ações de Sistema');
 
     const reportMetrics = [
-      ['Tempo Médio de Espera (TME):', 'Indica o intervalo médio entre a emissão da senha na recepção e o início efetivo da consulta.'],
-      ['Tempo Médio de Consulta (TMC):', 'Mede a duração média das consultas por médico ou especialidade para planejamento de escalas.'],
-      ['Taxa de Eficiência Operacional:', 'Percentual de pacientes atendidos com sucesso em relação aos que abandonaram ou faltaram.'],
-      ['Exportação de Relatórios:', 'Possibilidade de exportar relatórios detalhados em PDF oficial, planilhas CSV e dados analíticos para comando da ESSgt.']
+      ['Tempo Médio de Espera (TME) & TMA:', 'Métricas essenciais de espera até o consultório e duração média de consulta por especialidade, com gráficos analíticos e exportação em PDF e CSV.'],
+      ['Ações Globais Seguras (Configurações):', 'Botões de manutenção protegidos por modal visual: Zerar Histórico & Relatórios, Zerar Fila do Dia ou Recarregar 30 dias de Demonstração (120 atendimentos).']
     ];
 
     reportMetrics.forEach(([title, desc]) => {
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
+      doc.setFontSize(7.8);
       doc.setTextColor(15, 23, 42);
       doc.text(`• ${title}`, margin + 2, y);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.8);
+      doc.setFontSize(7.2);
       doc.setTextColor(71, 85, 105);
       const lines = doc.splitTextToSize(desc, contentWidth - 6);
-      doc.text(lines, margin + 6, y + 4.2);
-      y += 5 + lines.length * 3.8;
+      doc.text(lines, margin + 6, y + 3.8);
+      y += 4.5 + lines.length * 3.4;
     });
 
-    y += 4;
+    y += 2;
     y = drawSectionTitle(y, '5.3', 'Perguntas Frequentes & Resolução Rápida (FAQ)');
 
     const faqs = [
-      ['P: O que fazer se o médico esquecer a senha?', 'R: O administrador da UIS pode acessar a aba "Administrador > Usuários", selecionar o médico e redefinir sua senha imediatamente.'],
-      ['P: O sistema funciona sem internet?', 'R: Sim. A base local opera com persistência autônoma no navegador, permitindo continuidade total do atendimento ambulatorial.'],
-      ['P: Como zerar a fila no final do expediente?', 'R: Na aba Configurações, o coordenador pode clicar em "Zerar Fila de Espera" para preparar o sistema para o próximo dia útil.']
+      ['P: Como adicionar novas OPMs ou Postos/Graduações na recepção?', 'R: Acesse "Administrador > 4. Postos, OPMs & Assistência", digite a identificação e adicione. Ficará disponível imediatamente.'],
+      ['P: Como funciona a exclusão segura no sistema?', 'R: Qualquer exclusão (pacientes, usuários, salas ou tabelas de apoio) abre modal visual com nome e RE do registro, eliminando confirmações acidentais.'],
+      ['P: O sistema opera se houver instabilidade na rede?', 'R: Sim. A base local opera com persistência autônoma no navegador, permitindo continuidade total do atendimento ambulatorial da UIS.']
     ];
 
     faqs.forEach(([q, a]) => {
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.8);
+      doc.setFontSize(7.5);
       doc.setTextColor(30, 58, 138);
       doc.text(q, margin + 2, y);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
+      doc.setFontSize(7.2);
       doc.setTextColor(51, 65, 85);
       const aLines = doc.splitTextToSize(a, contentWidth - 4);
-      doc.text(aLines, margin + 4, y + 4);
-      y += 5.5 + aLines.length * 3.5;
+      doc.text(aLines, margin + 4, y + 3.8);
+      y += 4.8 + aLines.length * 3.3;
     });
 
-    y += 2;
+    y += 1.5;
     // Final institutional signoff box
     doc.setFillColor(241, 245, 249);
-    doc.roundedRect(margin, y, contentWidth, 14, 2, 2, 'F');
+    doc.roundedRect(margin, y, contentWidth, 13, 2, 2, 'F');
     doc.setTextColor(30, 41, 59);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text('ESCOLA SUPERIOR DE SARGENTOS • UNIDADE INTEGRADA DE SAÚDE (UIS)', pageWidth / 2, y + 5.5, { align: 'center' });
+    doc.setFontSize(7.8);
+    doc.text('ESCOLA SUPERIOR DE SARGENTOS • UNIDADE INTEGRADA DE SAÚDE (UIS)', pageWidth / 2, y + 5, { align: 'center' });
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
+    doc.setFontSize(6.8);
     doc.setTextColor(100, 116, 139);
-    doc.text('Polícia Militar do Estado de São Paulo • "A Força Pública de São Paulo"', pageWidth / 2, y + 10, { align: 'center' });
+    doc.text('Polícia Militar do Estado de São Paulo • "A Força Pública de São Paulo"', pageWidth / 2, y + 9.5, { align: 'center' });
   }
 
   // Save the generated document

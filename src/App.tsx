@@ -16,17 +16,14 @@ import { ManagerReportsView } from './components/ManagerReportsView';
 import { SettingsView } from './components/SettingsView';
 import { CallModalAlert } from './components/CallModalAlert';
 import { UserManualA4View } from './components/UserManualA4View';
+import { SystemDocsView } from './components/SystemDocsView';
 
 const AppContent: React.FC = () => {
   const { activeTab, currentUser } = useClinic();
-  const [isManualOpenGuest, setIsManualOpenGuest] = React.useState<boolean>(false);
 
-  // If user is not authenticated, show the Login Screen or the Manual
+  // If user is not authenticated, show only the Login Screen (access allowed only after authentication)
   if (!currentUser) {
-    if (isManualOpenGuest) {
-      return <UserManualA4View onClose={() => setIsManualOpenGuest(false)} />;
-    }
-    return <LoginView onOpenManual={() => setIsManualOpenGuest(true)} />;
+    return <LoginView />;
   }
 
   // If user is in TV Totem mode and on TV tab, show full screen TV directly
@@ -52,6 +49,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'gestao' && <ManagerReportsView />}
         {activeTab === 'configuracoes' && <SettingsView />}
         {activeTab === 'manual' && <UserManualA4View />}
+        {activeTab === 'documentacao' && <SystemDocsView />}
       </main>
 
       <CallModalAlert />

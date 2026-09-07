@@ -260,7 +260,7 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
           <div className="bg-white rounded-2xl p-6 text-slate-800 shadow-xl border border-slate-200 my-6 relative z-10">
             <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider mb-4 border-b border-slate-200 pb-2 flex items-center justify-between">
               <span>Estrutura do Manual do Usuário</span>
-              <span className="text-[10px] text-blue-600 font-bold">Edição 2026 • v2.4</span>
+              <span className="text-[10px] text-blue-600 font-bold">Edição 2026 • v2.5 Oficial</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
@@ -268,7 +268,7 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
                 <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">1</span>
                 <div>
                   <strong className="text-slate-900 block font-bold">Acesso & Segurança</strong>
-                  <p className="text-[11px] text-slate-600">Login, senha estrita do administrador e níveis de acesso.</p>
+                  <p className="text-[11px] text-slate-600">Login seguro, senha estrita do administrador e modais de confirmação.</p>
                 </div>
               </div>
 
@@ -276,7 +276,7 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
                 <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">2</span>
                 <div>
                   <strong className="text-slate-900 block font-bold">Recepção & Triagem</strong>
-                  <p className="text-[11px] text-slate-600">Cadastro militar (RE/OPM), civis e classificação de prioridades.</p>
+                  <p className="text-[11px] text-slate-600">Cadastro militar (RE/OPM/Posto/Convênio), prioridades e gestão segura da fila.</p>
                 </div>
               </div>
 
@@ -284,7 +284,7 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
                 <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">3</span>
                 <div>
                   <strong className="text-slate-900 block font-bold">Painel TV da Espera</strong>
-                  <p className="text-[11px] text-slate-600">Modo totem, sintetizador de voz (TTS) e som harmônico.</p>
+                  <p className="text-[11px] text-slate-600">Modo totem, sintetizador de voz (TTS) com termos militares e som harmônico.</p>
                 </div>
               </div>
 
@@ -292,15 +292,15 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
                 <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">4</span>
                 <div>
                   <strong className="text-slate-900 block font-bold">Consultórios</strong>
-                  <p className="text-[11px] text-slate-600">Chamada de pacientes, evolução médica e sala de medicação.</p>
+                  <p className="text-[11px] text-slate-600">Chamada ágil, evolução clínica, medicação e cronômetro de consulta.</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200 sm:col-span-2">
                 <span className="w-6 h-6 rounded-lg bg-purple-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">5</span>
                 <div>
-                  <strong className="text-slate-900 block font-bold">Administração, Relatórios & FAQ</strong>
-                  <p className="text-[11px] text-slate-600">Gestão de salas e usuários, métricas de tempo de espera e resolução de dúvidas.</p>
+                  <strong className="text-slate-900 block font-bold">Administração, Tabelas de Apoio, Relatórios & FAQ</strong>
+                  <p className="text-[11px] text-slate-600">4 abas de gestão (Salas, Usuários, Pacientes e Postos/OPMs/Convênios), métricas TME/TMA e auditoria.</p>
                 </div>
               </div>
             </div>
@@ -502,17 +502,17 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
                 </h4>
               </div>
 
-              <div className="space-y-2 text-xs">
+              <div className="space-y-1.5 text-xs">
                 {[
                   {
                     step: 'Passo 1',
-                    title: 'Identificação da Condição do Paciente',
-                    desc: 'Defina se o paciente é Militar Estadual (ativo, inativo ou aluno) ou Dependente Civil. Para militares, selecione o Posto ou Graduação (ex: Cel PM, Cap PM, 1º Sgt PM, Cb PM, Sd PM, Aluno Sgt PM).'
+                    title: 'Identificação da Condição & Posto/Graduação',
+                    desc: 'Defina se o paciente é Militar Estadual (ativo, inativo ou aluno) ou Dependente Civil. Para militares, selecione o Posto ou Graduação (ex: Cel PM, Cap PM, 1º Sgt PM, Cb PM, Sd PM, Aluno Sgt PM) alimentado pelas tabelas oficiais de apoio da UIS.'
                   },
                   {
                     step: 'Passo 2',
-                    title: 'Registro Estatístico (RE) e OPM',
-                    desc: 'Informe o RE militar (ex: 123456-7). Selecione a OPM de lotação do militar (ex: ESSgt, 1º BPM/M, APMBB, CPI-2). Em caso de dependente, registre o RE do titular.'
+                    title: 'Registro Estatístico (RE), OPM & Convênio',
+                    desc: 'Informe o RE militar (ex: 123456-7). Selecione a OPM de lotação (ex: ESSgt, 1º BPM/M, APMBB, CPI-2) e a Assistência à Saúde (Cruz Azul, CBPM, IAMSPE ou Particular). Em caso de dependente civil, registre o RE do titular.'
                   },
                   {
                     step: 'Passo 3',
@@ -530,22 +530,22 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
                     desc: 'Selecione o consultório inicial e clique em "Emitir Senha". A senha sequencial é gerada imediatamente (ex: CLI-012) e o comprovante pode ser impresso para o paciente.'
                   }
                 ].map((item, idx) => (
-                  <div key={idx} className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                  <div key={idx} className="p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
                     <span className="px-2 py-0.5 rounded-md bg-blue-600 text-white font-black text-[10px] uppercase shrink-0 mt-0.5">
                       {item.step}
                     </span>
                     <div>
                       <strong className="text-slate-900 font-bold block">{item.title}</strong>
-                      <p className="text-slate-600 text-[11px] mt-0.5 leading-tight">{item.desc}</p>
+                      <p className="text-slate-600 text-[10.5px] mt-0.5 leading-tight">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Section 2.2 */}
-              <div className="border-b border-slate-200 pb-2 pt-4">
-                <h4 className="text-sm font-black text-slate-900 uppercase flex items-center gap-2">
-                  <span className="w-5 h-5 rounded bg-blue-900 text-white text-xs flex items-center justify-center font-bold">2.2</span>
+              <div className="border-b border-slate-200 pb-1 pt-2">
+                <h4 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                  <span className="w-5 h-5 rounded bg-blue-900 text-white text-[11px] flex items-center justify-center font-bold">2.2</span>
                   Critérios Oficiais de Prioridade de Atendimento
                 </h4>
               </div>
@@ -554,44 +554,68 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
               <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 text-[11px]">
-                      <th className="p-2">Prioridade</th>
-                      <th className="p-2">Público Atendido & Fundamentação</th>
-                      <th className="p-2">Comportamento na Fila</th>
-                      <th className="p-2">Identificador</th>
+                    <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 text-[10.5px]">
+                      <th className="p-1.5">Prioridade</th>
+                      <th className="p-1.5">Público Atendido & Fundamentação</th>
+                      <th className="p-1.5">Comportamento na Fila</th>
+                      <th className="p-1.5">Identificador</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 text-[11px]">
+                  <tbody className="divide-y divide-slate-200 text-[10px]">
                     <tr className="bg-white">
-                      <td className="p-2 font-bold text-blue-700">NORMAL</td>
-                      <td className="p-2 text-slate-600">Consultas eletivas, exames periódicos e retornos de rotina</td>
-                      <td className="p-2 text-slate-600">Ordem cronológica de chegada à UIS</td>
-                      <td className="p-2"><span className="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[10px]">Azul</span></td>
+                      <td className="p-1.5 font-bold text-blue-700">NORMAL</td>
+                      <td className="p-1.5 text-slate-600">Consultas eletivas, exames periódicos e retornos de rotina</td>
+                      <td className="p-1.5 text-slate-600">Ordem cronológica de chegada à UIS</td>
+                      <td className="p-1.5"><span className="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[9.5px]">Azul</span></td>
                     </tr>
                     <tr className="bg-slate-50/60">
-                      <td className="p-2 font-bold text-amber-700">PREFERENCIAL</td>
-                      <td className="p-2 text-slate-600">Idosos (≥60 anos), gestantes, lactantes, pessoas com deficiência (Lei Federal nº 10.048/2000)</td>
-                      <td className="p-2 text-slate-600">Intercalado com prioridade sobre a fila normal</td>
-                      <td className="p-2"><span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[10px]">Amarelo</span></td>
+                      <td className="p-1.5 font-bold text-amber-700">PREFERENCIAL</td>
+                      <td className="p-1.5 text-slate-600">Idosos (≥60 anos), gestantes, lactantes, pessoas com deficiência (Lei Federal nº 10.048/2000)</td>
+                      <td className="p-1.5 text-slate-600">Intercalado com prioridade sobre a fila normal</td>
+                      <td className="p-1.5"><span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[9.5px]">Amarelo</span></td>
                     </tr>
                     <tr className="bg-white">
-                      <td className="p-2 font-bold text-red-600">URGÊNCIA</td>
-                      <td className="p-2 text-slate-600">Casos agudos, crises hipertensivas, dores intensas e traumas recentes</td>
-                      <td className="p-2 font-bold text-red-700">Prioridade MÁXIMA (Passa ao topo da fila)</td>
-                      <td className="p-2"><span className="px-1.5 py-0.5 bg-red-100 text-red-800 rounded font-bold text-[10px]">Vermelho</span></td>
+                      <td className="p-1.5 font-bold text-red-600">URGÊNCIA</td>
+                      <td className="p-1.5 text-slate-600">Casos agudos, crises hipertensivas, dores intensas e traumas recentes</td>
+                      <td className="p-1.5 font-bold text-red-700">Prioridade MÁXIMA (Passa ao topo da fila)</td>
+                      <td className="p-1.5"><span className="px-1.5 py-0.5 bg-red-100 text-red-800 rounded font-bold text-[9.5px]">Vermelho</span></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
+              {/* Section 2.3: Gestão Segura da Fila & Modais de Confirmação */}
+              <div className="border-b border-slate-200 pb-1 pt-2">
+                <h4 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                  <span className="w-5 h-5 rounded bg-blue-900 text-white text-[11px] flex items-center justify-center font-bold">2.3</span>
+                  Gestão Segura da Fila: Cancelar vs. Excluir Paciente
+                </h4>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200">
+                  <strong className="text-amber-900 block font-bold text-[11px] mb-0.5">Marcar como Cancelado (Desistência):</strong>
+                  <p className="text-slate-700 text-[10.5px] leading-tight">
+                    Retira o paciente da espera ativa, mas <strong>preserva o registro para auditoria clínica e estatísticas da UIS</strong>. Recomendado quando o paciente precisou ausentar-se ou desistiu do atendimento.
+                  </p>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-rose-50/80 border border-rose-200">
+                  <strong className="text-rose-900 block font-bold text-[11px] mb-0.5">Excluir Definitivamente:</strong>
+                  <p className="text-slate-700 text-[10.5px] leading-tight">
+                    Remove completamente o registro da base de dados. Utilizado exclusivamente em casos de <strong>erro de digitação ou cadastro duplicado acidental</strong>.
+                  </p>
+                </div>
+              </div>
+
               {/* Callout on ticket print */}
-              <div className="p-3.5 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl text-xs text-emerald-900 space-y-1">
-                <strong className="block font-bold flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Comprovante de Senha Impresso para o Militar / Dependente:
+              <div className="p-2.5 bg-emerald-50 border-l-4 border-emerald-500 rounded-xl text-xs text-emerald-900 space-y-0.5">
+                <strong className="block font-bold flex items-center gap-1.5 text-[11px]">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Comprovante Impresso & Modais Visuais de Confirmação:
                 </strong>
-                <p className="text-[11px] text-emerald-800 leading-relaxed">
-                  O ticket emitido pela recepção contém: Número Sequencial da Senha, Posto/Graduação, Nome Completo, RE, Consultório de Destino, Data e Hora de Chegada. Oriente o paciente a aguardar a chamada visual e sonora no saguão da UIS.
+                <p className="text-[10px] text-emerald-800 leading-tight">
+                  Toda exclusão na fila aciona modal visual seguro exibindo nome, RE, posto e senha, eliminando erros acidentais e substituindo diálogos nativos do navegador.
                 </p>
               </div>
             </div>
@@ -879,90 +903,104 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
               </span>
             </div>
 
-            <div className="space-y-4">
-              <div className="border-b border-slate-200 pb-2">
-                <h4 className="text-sm font-black text-slate-900 uppercase flex items-center gap-2">
-                  <span className="w-5 h-5 rounded bg-purple-900 text-white text-xs flex items-center justify-center font-bold">5.1</span>
-                  Gestão Centralizada (Painel do Administrador)
+            <div className="space-y-3">
+              <div className="border-b border-slate-200 pb-1.5">
+                <h4 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                  <span className="w-5 h-5 rounded bg-purple-900 text-white text-[11px] flex items-center justify-center font-bold">5.1</span>
+                  Gestão Centralizada: Os 4 Módulos do Painel Administrador
                 </h4>
               </div>
 
-              <div className="space-y-2 text-xs">
-                <div className="p-2.5 bg-purple-50/70 border border-purple-200 rounded-xl">
-                  <strong className="text-purple-900 font-bold block mb-0.5">1. Criar & Editar Consultórios:</strong>
-                  <p className="text-slate-600 text-[11px]">
-                    Permite adicionar novas salas físicas, definir siglas de senhas (ex: PSI para Psicologia, FIS para Fisioterapia), médico padrão e esquemas de cores.
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="p-2 bg-purple-50/70 border border-purple-200 rounded-xl">
+                  <strong className="text-purple-900 font-bold block mb-0.5 text-[11px]">1. Consultórios & Salas:</strong>
+                  <p className="text-slate-600 text-[10px] leading-tight">
+                    Adicionar salas, personalizar siglas (CLI, ODO, ESP, MED), cores e médicos padrão. Inclui trava de segurança que <strong>impede a exclusão do último consultório ativo</strong>.
                   </p>
                 </div>
 
-                <div className="p-2.5 bg-purple-50/70 border border-purple-200 rounded-xl">
-                  <strong className="text-purple-900 font-bold block mb-0.5">2. Gestão de Usuários & Senhas:</strong>
-                  <p className="text-slate-600 text-[11px]">
-                    Cadastre novos médicos, dentistas e recepcionistas. Defina o número de registro profissional (CRM/CRO/COREN) e redefina senhas esquecidas com um clique.
+                <div className="p-2 bg-purple-50/70 border border-purple-200 rounded-xl">
+                  <strong className="text-purple-900 font-bold block mb-0.5 text-[11px]">2. Usuários & Profissionais:</strong>
+                  <p className="text-slate-600 text-[10px] leading-tight">
+                    Cadastrar médicos, dentistas, equipe de enfermagem e recepcionistas. Controle de conselhos (CRM/CRO/COREN), redefinição de senhas e exclusão com modal de confirmação.
                   </p>
                 </div>
 
-                <div className="p-2.5 bg-purple-50/70 border border-purple-200 rounded-xl">
-                  <strong className="text-purple-900 font-bold block mb-0.5">3. Base Geral de Pacientes:</strong>
-                  <p className="text-slate-600 text-[11px]">
-                    Consulte o cadastro histórico de policiais militares e dependentes atendidos pela UIS, com busca rápida por RE, Nome ou OPM.
+                <div className="p-2 bg-purple-50/70 border border-purple-200 rounded-xl">
+                  <strong className="text-purple-900 font-bold block mb-0.5 text-[11px]">3. Base Geral de Pacientes:</strong>
+                  <p className="text-slate-600 text-[10px] leading-tight">
+                    Consulta histórica de policiais militares e dependentes civis, com filtros imediatos por RE, Nome ou OPM, edição cadastral e exclusão protegida por confirmação.
+                  </p>
+                </div>
+
+                <div className="p-2 bg-purple-50/70 border border-purple-200 rounded-xl">
+                  <strong className="text-purple-900 font-bold block mb-0.5 text-[11px]">4. Postos, OPMs & Convênios (Apoio):</strong>
+                  <p className="text-slate-600 text-[10px] leading-tight">
+                    Gestão dinâmica das tabelas que alimentam a recepção: adicionar e remover Postos/Graduações da PMESP, OPMs e Assistências Médicas com modais de confirmação visual.
                   </p>
                 </div>
               </div>
 
               {/* Section 5.2 */}
-              <div className="border-b border-slate-200 pb-2 pt-3">
-                <h4 className="text-sm font-black text-slate-900 uppercase flex items-center gap-2">
-                  <span className="w-5 h-5 rounded bg-blue-900 text-white text-xs flex items-center justify-center font-bold">5.2</span>
-                  Relatórios Estatísticos & Indicadores de Saúde
+              <div className="border-b border-slate-200 pb-1 pt-1.5">
+                <h4 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                  <span className="w-5 h-5 rounded bg-blue-900 text-white text-[11px] flex items-center justify-center font-bold">5.2</span>
+                  Relatórios Estatísticos & Ações Globais de Sistema
                 </h4>
               </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed">
-                A aba <strong>&quot;Relatórios&quot;</strong> gera métricas estratégicas para o Comando da ESSgt e Diretoria de Saúde:
-              </p>
-
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
-                  <strong className="text-blue-900 block text-[11px]">Tempo Médio de Espera (TME):</strong>
-                  <span className="text-slate-600 text-[10.5px]">Mede o intervalo entre a emissão da senha e a entrada no consultório.</span>
+                  <strong className="text-blue-900 block text-[10.5px]">Métricas TME & TMA:</strong>
+                  <span className="text-slate-600 text-[10px] leading-tight block">
+                    Monitoramento do Tempo Médio de Espera e Duração de Consultas por especialidade, com gráficos analíticos e exportação em PDF e CSV.
+                  </span>
                 </div>
                 <div className="p-2 bg-slate-50 rounded-lg border border-slate-200">
-                  <strong className="text-blue-900 block text-[11px]">Tempo Médio de Atendimento:</strong>
-                  <span className="text-slate-600 text-[10.5px]">Mede a duração das consultas por especialidade clínica.</span>
+                  <strong className="text-blue-900 block text-[10.5px]">Ações Globais Seguras:</strong>
+                  <span className="text-slate-600 text-[10px] leading-tight block">
+                    Na aba Configurações: botões para zerar relatórios, zerar fila ou recarregar 30 dias de histórico (120 atendimentos), todos com modais visuais.
+                  </span>
                 </div>
               </div>
 
               {/* Section 5.3 */}
-              <div className="border-b border-slate-200 pb-2 pt-3">
-                <h4 className="text-sm font-black text-slate-900 uppercase flex items-center gap-2">
-                  <span className="w-5 h-5 rounded bg-blue-900 text-white text-xs flex items-center justify-center font-bold">5.3</span>
-                  Perguntas Frequentes & Resolução Rápida (FAQ)
+              <div className="border-b border-slate-200 pb-1 pt-1.5">
+                <h4 className="text-xs font-black text-slate-900 uppercase flex items-center gap-2">
+                  <span className="w-5 h-5 rounded bg-blue-900 text-white text-[11px] flex items-center justify-center font-bold">5.3</span>
+                  Perguntas Frequentes & Procedimentos Rápidos (FAQ)
                 </h4>
               </div>
 
-              <div className="space-y-2 text-xs">
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-                  <strong className="text-slate-900 font-bold block">P: Como redefinir a senha de um profissional?</strong>
-                  <p className="text-slate-600 text-[11px] mt-0.5">
-                    R: O administrador da UIS acessa a aba &quot;Administrador &gt; Usuários&quot;, clica em &quot;Editar&quot; no profissional desejado e digita a nova senha.
+              <div className="space-y-1.5 text-xs">
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                  <strong className="text-slate-900 font-bold block text-[10.5px]">P: Como adicionar uma nova OPM ou Posto/Graduação na Recepção?</strong>
+                  <p className="text-slate-600 text-[10px] mt-0.5">
+                    R: Acesse &quot;Administrador &gt; 4. Postos, OPMs &amp; Assistência&quot;. Digite o nome da nova unidade ou posto e clique em &quot;Adicionar&quot;. Ficará disponível imediatamente na triagem.
                   </p>
                 </div>
 
-                <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
-                  <strong className="text-slate-900 font-bold block">P: O sistema opera se houver instabilidade na rede?</strong>
-                  <p className="text-slate-600 text-[11px] mt-0.5">
-                    R: Sim. Toda a operação de filas e histórico é mantida no armazenamento local do navegador, garantindo atendimento contínuo na UIS.
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                  <strong className="text-slate-900 font-bold block text-[10.5px]">P: É seguro excluir um paciente ou consultório?</strong>
+                  <p className="text-slate-600 text-[10px] mt-0.5">
+                    R: Sim. Todos os botões de lixeira acionam modais de confirmação específicos com os dados do registro, prevenindo toques acidentais e travando a exclusão se for o único consultório restante.
+                  </p>
+                </div>
+
+                <div className="p-2 bg-slate-50 rounded-xl border border-slate-200">
+                  <strong className="text-slate-900 font-bold block text-[10.5px]">P: O sistema opera se houver instabilidade na rede?</strong>
+                  <p className="text-slate-600 text-[10px] mt-0.5">
+                    R: Sim. As filas, configurações e relatórios possuem persistência autônoma no navegador, permitindo continuidade total do atendimento na UIS.
                   </p>
                 </div>
               </div>
 
               {/* Institutional Seal Box */}
-              <div className="p-3 bg-slate-900 text-white rounded-xl text-center space-y-1 mt-4">
-                <p className="text-xs font-black uppercase text-blue-300">
+              <div className="p-2.5 bg-slate-900 text-white rounded-xl text-center space-y-0.5 mt-2">
+                <p className="text-[11px] font-black uppercase text-blue-300">
                   Polícia Militar do Estado de São Paulo • ESSgt / UIS
                 </p>
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[9.5px] text-slate-400">
                   &quot;Nós, Policiais Militares, sob a proteção de Deus, estamos compromissados com a Defesa da Vida e da Saúde.&quot;
                 </p>
               </div>

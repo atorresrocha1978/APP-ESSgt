@@ -1229,14 +1229,9 @@ export const AdminDashboardView: React.FC = () => {
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => {
-                                  if (window.confirm(`Remover paciente ${p.name} da lista?`)) {
-                                    deletePatient(p.id);
-                                    showToast(`Paciente ${p.name} removido.`);
-                                  }
-                                }}
+                                onClick={() => setPatientToDelete(p)}
                                 title="Excluir paciente"
-                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 cursor-pointer"
+                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 cursor-pointer transition-colors"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -1637,12 +1632,7 @@ export const AdminDashboardView: React.FC = () => {
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (window.confirm(`Deseja realmente remover o posto "${rank}"?`)) {
-                                  deleteMilitaryRank(rank);
-                                  showToast(`Posto "${rank}" removido.`);
-                                }
-                              }}
+                              onClick={() => setItemToDelete({ type: 'rank', name: rank })}
                               className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                               title="Excluir"
                             >
@@ -1755,12 +1745,7 @@ export const AdminDashboardView: React.FC = () => {
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (window.confirm(`Deseja realmente remover a OPM "${opm}"?`)) {
-                                  deleteOpm(opm);
-                                  showToast(`OPM "${opm}" removida.`);
-                                }
-                              }}
+                              onClick={() => setItemToDelete({ type: 'opm', name: opm })}
                               className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                               title="Excluir"
                             >
@@ -1873,12 +1858,7 @@ export const AdminDashboardView: React.FC = () => {
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => {
-                                if (window.confirm(`Deseja realmente remover o plano "${ins}"?`)) {
-                                  deleteHealthInsurance(ins);
-                                  showToast(`Assistência "${ins}" removida.`);
-                                }
-                              }}
+                              onClick={() => setItemToDelete({ type: 'insurance', name: ins })}
                               className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                               title="Excluir"
                             >
@@ -1892,6 +1872,152 @@ export const AdminDashboardView: React.FC = () => {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL DE CONFIRMAÇÃO: EXCLUSÃO DE PACIENTE */}
+      {/* ========================================================================= */}
+      {patientToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+              <Trash2 className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            
+            <h3 className="text-lg font-black text-slate-900">
+              Confirmar Exclusão de Paciente
+            </h3>
+            
+            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+              Você está prestes a excluir permanentemente o paciente <strong className="text-slate-900">{patientToDelete.name}</strong> (Senha: <span className="font-mono font-bold text-purple-700">{patientToDelete.ticketNumber}</span>).
+            </p>
+
+            <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium">
+              Esta ação removerá o paciente da fila de atendimento e do sistema. Deseja prosseguir?
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setPatientToDelete(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deletePatient(patientToDelete.id);
+                  showToast(`Paciente ${patientToDelete.name} excluído com sucesso.`);
+                  setPatientToDelete(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-md shadow-rose-200 transition-all flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Sim, Excluir Paciente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL DE CONFIRMAÇÃO: EXCLUSÃO DE CONSULTÓRIO */}
+      {/* ========================================================================= */}
+      {roomToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+              <Trash2 className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            
+            <h3 className="text-lg font-black text-slate-900">
+              Confirmar Exclusão de Consultório
+            </h3>
+            
+            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+              Você está prestes a excluir o consultório <strong className="text-slate-900">{roomToDelete.name}</strong> ({roomToDelete.subname}).
+            </p>
+
+            <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
+              Atenção: Certifique-se de que não haja pacientes aguardando especificamente nesta sala antes de excluí-la.
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setRoomToDelete(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteRoom(roomToDelete.id);
+                  showToast(`Consultório "${roomToDelete.name}" excluído com sucesso.`);
+                  setRoomToDelete(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-md shadow-rose-200 transition-all flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Sim, Excluir Consultório
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL DE CONFIRMAÇÃO: EXCLUSÃO DE TABELAS DE APOIO */}
+      {/* ========================================================================= */}
+      {itemToDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+              <Trash2 className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            
+            <h3 className="text-lg font-black text-slate-900">
+              Confirmar Exclusão
+            </h3>
+            
+            <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+              Deseja realmente remover {itemToDelete.type === 'rank' ? 'o posto / graduação' : itemToDelete.type === 'opm' ? 'a OPM' : 'o convênio / assistência'}{' '}
+              <strong className="text-slate-900">"{itemToDelete.name}"</strong> das opções disponíveis do sistema?
+            </p>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (itemToDelete.type === 'rank') {
+                    deleteMilitaryRank(itemToDelete.name);
+                    showToast(`Posto "${itemToDelete.name}" excluído.`);
+                  } else if (itemToDelete.type === 'opm') {
+                    deleteOpm(itemToDelete.name);
+                    showToast(`OPM "${itemToDelete.name}" excluída.`);
+                  } else if (itemToDelete.type === 'insurance') {
+                    deleteHealthInsurance(itemToDelete.name);
+                    showToast(`Assistência "${itemToDelete.name}" excluída.`);
+                  }
+                  setItemToDelete(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs cursor-pointer shadow-md shadow-rose-200 transition-all flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Sim, Excluir
+              </button>
+            </div>
           </div>
         </div>
       )}
