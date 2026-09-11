@@ -19,7 +19,6 @@ export const LoginView: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [imgError, setImgError] = useState<boolean>(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,19 +53,9 @@ export const LoginView: React.FC = () => {
         {/* Institutional Header */}
         <div className="text-center space-y-3">
           <div className="flex justify-center">
-            {!imgError ? (
-              <img 
-                src="/brasao_essgt.png" 
-                alt="Brasão Oficial da Escola Superior de Sargentos - ESSgt" 
-                onError={() => setImgError(true)}
-                referrerPolicy="no-referrer"
-                className="w-24 h-32 sm:w-28 sm:h-36 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-3xl bg-red-600 text-white shadow-xl shadow-red-900/50 flex items-center justify-center ring-4 ring-white/10">
-                <ShieldCheck className="w-12 h-12 stroke-[2]" />
-              </div>
-            )}
+            <div className="w-20 h-20 rounded-3xl bg-red-600 text-white shadow-xl shadow-red-900/50 flex items-center justify-center ring-4 ring-white/10">
+              <ShieldCheck className="w-10 h-10 stroke-[2]" />
+            </div>
           </div>
 
           <div>

@@ -61,19 +61,20 @@ export const Navbar: React.FC = () => {
             className="flex items-center gap-3 shrink-0 cursor-pointer group"
             title="Ir para o Menu Principal"
           >
-            <img 
-              src="/brasao_essgt.png" 
-              alt="Brasão ESSgt" 
-              referrerPolicy="no-referrer"
-              className="w-10 h-12 object-contain drop-shadow-md group-hover:scale-110 transition-transform" 
-            />
+            <div className="w-10 h-10 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-200 group-hover:scale-105 transition-transform">
+              <Activity className="w-5 h-5 stroke-[2.5]" />
+            </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-lg sm:text-xl tracking-tight text-slate-800">
                   ESSgt <span className="text-red-600 font-black">- UIS</span>
                 </span>
-                <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase tracking-wider bg-red-50 text-red-600 border border-red-200">
-                  Ao Vivo
+                <span 
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  title="Servidor local operacional em 10.43.225.80:3000"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
+                  10.43.225.80
                 </span>
               </div>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hidden md:block">

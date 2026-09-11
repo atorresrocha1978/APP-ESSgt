@@ -297,15 +297,34 @@ export interface AttendanceRecord {
 - Node.js 18.x ou superior.
 - NPM 9.x ou superior.
 
-### 6.2 Execução em Ambiente de Desenvolvimento
+### 6.2 Execução no Servidor Local (IP 10.43.225.80)
 ```bash
 # 1. Instalar as dependências do projeto
 npm install
 
-# 2. Iniciar o servidor de desenvolvimento
+# 2. Iniciar o servidor local (escuta em 0.0.0.0:3000)
 npm run dev
+
+# 3. Execução em produção standalone
+npm run build
+npm start
 ```
-O aplicativo será disponibilizado na porta padrão `3000` (`http://localhost:3000`).
+O aplicativo será disponibilizado na porta padrão `3000`:
+- **Acesso local na máquina**: `http://localhost:3000`
+- **Acesso por qualquer computador ou TV na rede local**: `http://10.43.225.80:3000`
+
+#### Liberação de Firewall (Porta 3000 TCP):
+- **Windows Server / Windows 10/11** (Prompt de Comando como Administrador):
+  ```cmd
+  netsh advfirewall firewall add rule name="UIS ESSgt Porta 3000" dir=in action=allow protocol=TCP localport=3000
+  ```
+- **Linux** (UFW):
+  ```bash
+  sudo ufw allow 3000/tcp
+  ```
+
+#### Sincronização em Tempo Real (LAN):
+O servidor Express integrado provê um canal nativo **Server-Sent Events (SSE)** em `/api/events`. Quando qualquer médico ou atendente emite uma chamada ou atualiza a fila a partir de seu navegador (`http://10.43.225.80:3000`), a alteração é instantaneamente propagada via rede para a Smart TV da sala de espera e para as demais estações sem necessidade de recarregar a página.
 
 ### 6.3 Verificação de Sintaxe e Compilação
 ```bash
@@ -315,7 +334,7 @@ npm run lint
 # Executar o build otimizado para produção
 npm run build
 ```
-Os artefatos compilados serão gerados no diretório `dist/`.
+Os artefatos compilados serão gerados no diretório `dist/` e o servidor compilado em `dist/server.cjs`.
 
 ---
 

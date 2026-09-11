@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { 
   Patient, 
   CallNotification, 
@@ -109,6 +109,13 @@ interface ClinicContextType {
   clearReports: () => void;
   dismissCurrentCallAlert: () => void;
   isCallingAnimation: boolean;
+
+  // Local Server & Network Sync (10.43.225.80)
+  serverIp: string;
+  serverUrl: string;
+  networkStatus: 'online' | 'reconnecting' | 'offline';
+  connectedClientsCount: number;
+  syncWithServer: () => Promise<void>;
 }
 
 const ClinicContext = createContext<ClinicContextType | undefined>(undefined);
@@ -266,6 +273,176 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return DEFAULT_HEALTH_INSURANCES;
   });
 
+  // Client identifier and Network state (10.43.225.80)
+  const clientId = useMemo(() => 'cli_' + Math.random().toString(36).substring(2, 9), []);
+  const [networkStatus, setNetworkStatus] = useState<'online' | 'reconnecting' | 'offline'>('online');
+  const [connectedClientsCount, setConnectedClientsCount] = useState<number>(1);
+  const isRemoteUpdateRef = useRef(false);
+  const serverIp = '10.43.225.80';
+
+  const serverUrl = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      const port = window.location.port ? `:${window.location.port}` : '';
+      return `${window.location.protocol}//${host}${port}`;
+    }
+    return 'http://10.43.225.80:3000';
+  }, []);
+
+  // Sync state with local server on startup
+  const syncWithServer = useCallback(async () => {
+    try {
+      const res = await fetch('/api/state');
+      if (!res.ok) return;
+      const json = await res.json();
+      if (!json.success || !json.data) return;
+
+      const s = json.data;
+      isRemoteUpdateRef.current = true;
+      if (Array.isArray(s.patients) && s.patients.length > 0) {
+        setPatients(s.patients);
+      }
+      if (Array.isArray(s.callHistory)) {
+        setCallHistory(s.callHistory);
+      }
+      if (s.currentCall) {
+        setCurrentCall(s.currentCall);
+      }
+      if (Array.isArray(s.records)) {
+        setAttendanceRecords(s.records);
+      }
+      if (s.rooms && Object.keys(s.rooms).length > 0) {
+        setRooms(s.rooms);
+      }
+      if (Array.isArray(s.users) && s.users.length > 0) {
+        setUsers(s.users);
+      }
+      if (Array.isArray(s.militaryRanks) && s.militaryRanks.length > 0) {
+        setMilitaryRanks(s.militaryRanks);
+      }
+      if (Array.isArray(s.opms) && s.opms.length > 0) {
+        setOpms(s.opms);
+      }
+      if (Array.isArray(s.healthInsurances) && s.healthInsurances.length > 0) {
+        setHealthInsurances(s.healthInsurances);
+      }
+      setTimeout(() => {
+        isRemoteUpdateRef.current = false;
+      }, 500);
+    } catch (e) {
+      console.warn('[UIS Sync] Servidor ainda iniciando ou offline, usando armazenamento local:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    syncWithServer();
+  }, [syncWithServer]);
+
+  // Server-Sent Events (SSE) for Real-Time synchronization across all workstations & TV
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    let reconnectTimer: any = null;
+
+    const setupSSE = () => {
+      try {
+        eventSource = new EventSource('/api/events');
+
+        eventSource.onopen = () => {
+          setNetworkStatus('online');
+        };
+
+        eventSource.addEventListener('connected', (e: MessageEvent) => {
+          try {
+            const data = JSON.parse(e.data);
+            if (data.connectedClients) {
+              setConnectedClientsCount(data.connectedClients);
+            }
+          } catch {}
+        });
+
+        eventSource.onmessage = (event) => {
+          try {
+            const { type, payload } = JSON.parse(event.data);
+            if (type === 'CALL_PATIENT') {
+              isRemoteUpdateRef.current = true;
+              setCurrentCall(payload.call);
+              setCallHistory(prev => [payload.call, ...prev.filter(c => c.id !== payload.call.id).slice(0, 19)]);
+              setIsCallingAnimation(true);
+              setTimeout(() => setIsCallingAnimation(false), 9000);
+
+              if (Array.isArray(payload.patients)) {
+                setPatients(payload.patients);
+              }
+
+              // Play audio announcement on TV or active workstations
+              const audioCfg = payload.audioSettings || audioSettings;
+              if (audioCfg.enabled) {
+                const roomInfo = rooms[payload.call.roomId] || ROOMS[payload.call.roomId];
+                const displayNameForVoice = `${payload.call.rank && payload.call.rank !== 'Civil' ? payload.call.rank + ' ' : ''}${payload.call.patientName}`;
+                soundService.announcePatient(
+                  payload.call.roomId,
+                  payload.call.ticketNumber,
+                  displayNameForVoice,
+                  payload.call.roomName,
+                  roomInfo?.subname,
+                  audioCfg.volume,
+                  audioCfg.voiceEnabled,
+                  audioCfg.voiceVolume
+                );
+              }
+
+              setTimeout(() => {
+                isRemoteUpdateRef.current = false;
+              }, 500);
+            } else if (type === 'PATIENTS_SYNC') {
+              if (Array.isArray(payload.patients)) {
+                isRemoteUpdateRef.current = true;
+                setPatients(payload.patients);
+                setTimeout(() => {
+                  isRemoteUpdateRef.current = false;
+                }, 500);
+              }
+            } else if (type === 'STATE_UPDATED') {
+              if (payload.updates) {
+                isRemoteUpdateRef.current = true;
+                const u = payload.updates;
+                if (u.patients) setPatients(u.patients);
+                if (u.records) setAttendanceRecords(u.records);
+                if (u.callHistory) setCallHistory(u.callHistory);
+                if (u.rooms) setRooms(u.rooms);
+                if (u.users) setUsers(u.users);
+                if (u.militaryRanks) setMilitaryRanks(u.militaryRanks);
+                if (u.opms) setOpms(u.opms);
+                if (u.healthInsurances) setHealthInsurances(u.healthInsurances);
+                setTimeout(() => {
+                  isRemoteUpdateRef.current = false;
+                }, 500);
+              }
+            }
+          } catch (err) {
+            console.error('[SSE Event Error]', err);
+          }
+        };
+
+        eventSource.onerror = () => {
+          setNetworkStatus('reconnecting');
+          eventSource?.close();
+          reconnectTimer = setTimeout(setupSSE, 4000);
+        };
+      } catch (err) {
+        setNetworkStatus('offline');
+        reconnectTimer = setTimeout(setupSSE, 5000);
+      }
+    };
+
+    setupSSE();
+
+    return () => {
+      eventSource?.close();
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+    };
+  }, [audioSettings, rooms]);
+
   // Persist state updates
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
@@ -281,7 +458,15 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PATIENTS, JSON.stringify(patients));
-  }, [patients]);
+    // Also sync to server if local update
+    if (!isRemoteUpdateRef.current) {
+      fetch('/api/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patients, clientId })
+      }).catch(() => {});
+    }
+  }, [patients, clientId]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(attendanceRecords));
@@ -353,7 +538,7 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [rooms]);
 
-  const broadcastCall = (call: CallNotification) => {
+  const broadcastCall = (call: CallNotification, updatedPatientsQueue?: Patient[]) => {
     try {
       const channel = new BroadcastChannel('medifila_channel');
       channel.postMessage({
@@ -370,6 +555,20 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } catch (e) {
       console.warn(e);
     }
+
+    // Also send via HTTP POST to local server (10.43.225.80) to broadcast via SSE to all other LAN workstations & TVs
+    fetch('/api/call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        call,
+        audioSettings,
+        patients: updatedPatientsQueue || patients,
+        clientId
+      })
+    }).catch(err => {
+      console.warn('[Call API error]', err);
+    });
   };
 
   const updateAudioSettings = (newSettings: Partial<AudioSettings>) => {
@@ -704,11 +903,11 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
 
     // Update patient status in state
-    setPatients(prev => prev.map(p => {
+    const updatedPatients = patients.map(p => {
       if (p.id === patientId) {
         return {
           ...p,
-          status: 'chamado',
+          status: 'chamado' as const,
           calledAt: nowIso,
           callCount: (p.callCount || 0) + 1,
           lastCalledRoomId: roomId,
@@ -716,15 +915,17 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         };
       }
       return p;
-    }));
+    });
+
+    setPatients(updatedPatients);
 
     setCurrentCall(callNotification);
     setCallHistory(prev => [callNotification, ...prev.slice(0, 19)]);
     setIsCallingAnimation(true);
     setTimeout(() => setIsCallingAnimation(false), 9000);
 
-    // Broadcast to other tabs
-    broadcastCall(callNotification);
+    // Broadcast to other tabs and local network server (10.43.225.80)
+    broadcastCall(callNotification, updatedPatients);
 
     // Play Audio & Speech (Announcing rank + name)
     if (audioSettings.enabled) {
@@ -1154,7 +1355,12 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     clearQueue,
     clearReports,
     dismissCurrentCallAlert,
-    isCallingAnimation
+    isCallingAnimation,
+    serverIp,
+    serverUrl,
+    networkStatus,
+    connectedClientsCount,
+    syncWithServer
   }), [
     currentUser,
     users,
@@ -1195,7 +1401,12 @@ export const ClinicProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     deletePatient,
     callPatient,
     getMetrics,
-    isCallingAnimation
+    isCallingAnimation,
+    serverIp,
+    serverUrl,
+    networkStatus,
+    connectedClientsCount,
+    syncWithServer
   ]);
 
   return (

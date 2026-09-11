@@ -55,27 +55,19 @@ export const MainMenuHub: React.FC = () => {
         <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="flex items-start sm:items-center gap-5">
-            <img 
-              src="/brasao_essgt.png" 
-              alt="Brasão Oficial da Escola Superior de Sargentos - ESSgt" 
-              referrerPolicy="no-referrer"
-              className="w-16 h-22 sm:w-20 sm:h-28 object-contain drop-shadow-2xl shrink-0" 
-            />
-            <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Polícia Militar do Estado de São Paulo • ESSgt
-              </div>
-              
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Unidade Integrada de Saúde (UIS)
-              </h1>
-              
-              <p className="text-sm sm:text-base text-slate-300 max-w-2xl font-normal leading-relaxed">
-                Menu Principal de Acesso Operacional • Selecione o módulo do sistema para iniciar suas atividades ou gerenciar a unidade.
-              </p>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Polícia Militar do Estado de São Paulo • ESSgt
             </div>
+            
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Unidade Integrada de Saúde (UIS)
+            </h1>
+            
+            <p className="text-sm sm:text-base text-slate-300 max-w-2xl font-normal leading-relaxed">
+              Menu Principal de Acesso Operacional • Selecione o módulo do sistema para iniciar suas atividades ou gerenciar a unidade.
+            </p>
           </div>
 
           {/* User profile & Quick logout */}

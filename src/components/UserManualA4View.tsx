@@ -226,16 +226,17 @@ export const UserManualA4View: React.FC<UserManualA4ViewProps> = ({ onClose }) =
             </div>
 
             {/* Emblem Shield Center */}
-            <div className="flex flex-col items-center my-8">
-              <img 
-                src="/brasao_essgt.png" 
-                alt="Brasão Oficial da Escola Superior de Sargentos" 
-                referrerPolicy="no-referrer"
-                className="w-32 h-44 object-contain drop-shadow-2xl" 
-              />
-              <span className="text-[11px] font-black text-slate-300 mt-2 tracking-widest uppercase">
-                ESSgt - UIS • 1936
-              </span>
+            <div className="flex flex-col items-center my-10">
+              <div className="w-32 h-36 rounded-3xl bg-slate-800 border-2 border-red-500 shadow-2xl flex flex-col items-center justify-center relative p-4 group">
+                <div className="w-16 h-16 relative flex items-center justify-center">
+                  <div className="w-4 h-14 bg-red-600 rounded-xs absolute"></div>
+                  <div className="w-14 h-4 bg-red-600 rounded-xs absolute"></div>
+                </div>
+                <span className="text-[11px] font-black text-white mt-2 tracking-widest uppercase">
+                  ESSgt - UIS
+                </span>
+                <span className="text-[9px] font-bold text-red-400">1936</span>
+              </div>
             </div>
 
             {/* Main Title */}

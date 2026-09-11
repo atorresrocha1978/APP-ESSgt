@@ -627,7 +627,7 @@ export const SystemDocsView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
                   </div>
 
                   <div className="bg-slate-900 text-slate-100 p-3 rounded-xl font-mono text-[11px]">
-                    <span className="text-slate-500 block mb-1"># 2. Executar servidor de desenvolvimento (porta 3000)</span>
+                    <span className="text-slate-500 block mb-1"># 2. Executar servidor local no IP 10.43.225.80 (porta 3000)</span>
                     npm run dev
                   </div>
 
@@ -637,9 +637,27 @@ export const SystemDocsView: React.FC<{ onClose?: () => void }> = ({ onClose }) 
                   </div>
 
                   <div className="bg-slate-900 text-slate-100 p-3 rounded-xl font-mono text-[11px]">
-                    <span className="text-slate-500 block mb-1"># 4. Gerar build de produção para implantação</span>
-                    npm run build
+                    <span className="text-slate-500 block mb-1"># 4. Gerar build e executar em modo de produção standalone</span>
+                    npm run build && npm start
                   </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 mt-4 space-y-2">
+                  <h4 className="font-bold text-xs text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>📡 Acesso via Rede Local (IP 10.43.225.80)</span>
+                  </h4>
+                  <p className="text-xs text-blue-800 leading-relaxed">
+                    O servidor realiza escuta em <code className="font-mono bg-blue-100 px-1 py-0.5 rounded">0.0.0.0:3000</code>. Todos os computadores, tablets e smart TVs conectados à intranet da UIS/ESSgt devem acessar o endereço:
+                  </p>
+                  <div className="bg-slate-900 text-emerald-400 p-2.5 rounded-lg font-mono text-xs select-all">
+                    http://10.43.225.80:3000
+                  </div>
+                  <ul className="text-[11px] text-blue-800 space-y-1 list-disc list-inside">
+                    <li><strong>Painel TV:</strong> Faça login com usuário <code className="font-mono">painel.tv</code> e senha <code className="font-mono">tv</code> na tela da sala de espera.</li>
+                    <li><strong>Recepção:</strong> Usuário <code className="font-mono">recepcao</code> / Senha <code className="font-mono">123</code>.</li>
+                    <li><strong>Consultórios:</strong> Médicos e dentistas acessam pelo mesmo link com suas respectivas credenciais.</li>
+                    <li><strong>Sincronização:</strong> O servidor utiliza Server-Sent Events (SSE) para atualização instantânea em tempo real de chamadas e áudio em toda a rede.</li>
+                  </ul>
                 </div>
               </div>
             </section>
